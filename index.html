@@ -12,10 +12,11 @@
         .ios-blur { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
         body { background-color: #f2f2f7; font-family: -apple-system, sans-serif; overflow-x: hidden; }
         .trip-card:active { scale: 0.98; transition: 0.2s; }
+        [v-cloak] { display: none; }
     </style>
 </head>
 <body>
-    <div id="app" class="max-w-md mx-auto min-h-screen relative flex flex-col shadow-2xl bg-[#f2f2f7]">
+    <div id="app" v-cloak class="max-w-md mx-auto min-h-screen relative flex flex-col shadow-2xl bg-[#f2f2f7]">
         
         <div v-if="view === 'main'" class="p-8">
             <h1 class="text-4xl font-black mb-2 mt-12 text-gray-800">Karina's Trip Planner🤍</h1>
@@ -36,7 +37,7 @@
 
                 <div @click="enterTrip('JapanNorthEast')" class="trip-card group relative bg-white rounded-[2rem] p-6 shadow-xl border border-emerald-50 cursor-pointer overflow-hidden transition-all">
                     <div class="absolute right-[-20px] top-[-20px] text-emerald-50 text-8xl font-bold opacity-20">JP</div>
-                    <h2 class="text-2xl font-bold text-gray-800">🇯🇵 '26 Mar 東北 5D4N</h2>
+                    <h2 class="text-2xl font-bold text-gray-800">🇯🇵 '26 Mar 青森仙台盛岡 5D4N</h2>
                     <p class="text-emerald-600 text-sm font-medium mt-1">with Dad</p>
                 </div>
             </div>
@@ -51,19 +52,18 @@
 
             <div class="flex p-1.5 bg-gray-200/50 rounded-2xl m-4">
                 <button @click="currentTab = 'schedule'" :class="currentTab === 'schedule' ? 'bg-white shadow text-blue-600' : 'text-gray-500'" class="flex-1 py-2 rounded-xl text-sm font-bold transition-all">行程表</button>
-                <button @click="currentTab = 'split'" :class="currentTab === 'split' ? 'bg-white shadow text-blue-600' : 'text-gray-500'" class="flex-1 py-2 rounded-xl text-sm font-bold transition-all">分帳 (Spliito)</button>
+                <button @click="currentTab = 'split'" :class="currentTab === 'split' ? 'bg-white shadow text-blue-600' : 'text-gray-500'" class="flex-1 py-2 rounded-xl text-sm font-bold transition-all">分帳</button>
             </div>
 
             <div v-if="currentTab === 'schedule'" class="px-4 space-y-4">
-                <div v-for="(item, index) in currentSchedule" :key="item.id" class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex gap-4">
+                <div v-for="item in currentSchedule" :key="item.id" class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex gap-4">
                     <div class="flex flex-col items-center min-w-[50px]">
                         <span class="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-lg uppercase tracking-tighter">{{ item.time }}</span>
                     </div>
                     <div class="flex-grow">
                         <h4 class="font-bold text-gray-800">{{ item.location }}</h4>
-                        <p class="text-xs text-gray-400 mt-1">{{ item.note }}</p>
                         <div class="flex gap-4 mt-3">
-                            <a :href="'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(item.location)" target="_blank" class="text-[10px] text-blue-500 font-bold tracking-widest uppercase">導航</a>
+                            <a :href="'https://www.google.com/maps/search/' + encodeURIComponent(item.location)" target="_blank" class="text-[10px] text-blue-500 font-bold uppercase tracking-widest">導航</a>
                             <button @click="deleteItem(item.id)" class="text-[10px] text-red-300 font-bold uppercase">刪除</button>
                         </div>
                     </div>
@@ -76,35 +76,21 @@
             <div v-if="currentTab === 'split'" class="px-4">
                 <div class="bg-gray-900 rounded-[2.5rem] p-8 text-white shadow-2xl text-center">
                     <h3 class="text-2xl font-bold">Spliito 快速記帳</h3>
-                    <p class="text-gray-400 text-sm mt-2 mb-6 tracking-wide">與夥伴記錄每一筆開支</p>
-                    <a href="https://spliito.com" target="_blank" class="bg-white text-gray-900 px-10 py-3 rounded-2xl font-black text-sm inline-block">立即開啟</a>
+                    <a href="https://spliito.com" target="_blank" class="mt-6 bg-white text-gray-900 px-10 py-3 rounded-2xl font-black text-sm inline-block tracking-wide">立即開啟</a>
                 </div>
             </div>
         </div>
 
-        <nav v-if="view === 'trip'" class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[80%] bg-gray-900/90 ios-blur rounded-full px-8 py-4 shadow-2xl z-50 border border-white/10 flex justify-center">
-            <button @click="openTranslate" class="text-white flex items-center gap-3">
-                <i class="fas fa-language text-blue-400 text-xl"></i>
-                <span class="text-sm font-bold tracking-widest uppercase">Google 翻譯</span>
-            </button>
-        </nav>
-
         <div v-if="showModal" class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="showModal = false">
-            <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl transform transition-all">
-                <h3 class="text-xl font-bold mb-6 text-gray-800">在哪裡碰面？</h3>
+            <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl">
+                <h3 class="text-xl font-bold mb-6 text-gray-800 text-center">在哪裡碰面？</h3>
                 <div class="space-y-4">
-                    <div class="bg-gray-100 rounded-2xl p-4 flex items-center">
-                        <i class="far fa-clock text-gray-400 mr-3"></i>
-                        <input v-model="form.time" type="time" class="bg-transparent w-full outline-none text-gray-700">
-                    </div>
-                    <div class="bg-gray-100 rounded-2xl p-4 flex items-center">
-                        <i class="fas fa-map-marker-alt text-gray-400 mr-3"></i>
-                        <input v-model="form.location" type="text" placeholder="目的地名稱" class="bg-transparent w-full outline-none text-gray-700">
-                    </div>
+                    <input v-model="form.time" type="time" class="w-full bg-gray-100 p-4 rounded-2xl border-none">
+                    <input v-model="form.location" type="text" placeholder="目的地名稱" class="w-full bg-gray-100 p-4 rounded-2xl border-none">
                 </div>
                 <div class="flex gap-4 mt-8">
                     <button @click="showModal = false" class="flex-1 py-4 text-gray-400 font-bold">取消</button>
-                    <button @click="addItem" class="flex-[2] py-4 bg-blue-600 text-white rounded-2xl font-bold shadow-lg shadow-blue-200">確認加入</button>
+                    <button @click="addItem" class="flex-[2] py-4 bg-blue-600 text-white rounded-2xl font-bold shadow-lg">確認加入</button>
                 </div>
             </div>
         </div>
@@ -114,11 +100,8 @@
     <script>
         const { createApp, ref, reactive, computed, onMounted } = Vue;
 
-        // --- ！！！金鑰已自動填入！！！ ---
         const supabaseUrl = 'https://wutwyafokyebqzhfdrct.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1dHd5YWZva3llYnF6aGZkcmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgzNDMyNjYsImV4cCI6MjA4MzkxOTI2Nn0.2qvKu3Wwee7zT1vp0G3pMOhRHuObJSuK8Sy9qWdNxJ4';
-        // ------------------------------------------
-
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
         createApp({
@@ -127,7 +110,7 @@
                 const currentTab = ref('schedule');
                 const activeTrip = ref('');
                 const showModal = ref(false); 
-                const form = reactive({ time: '', location: '', note: '' });
+                const form = reactive({ time: '', location: '' });
                 const tripsData = reactive({ 'Seoul': [], 'Tokyo': [], 'JapanNorthEast': [] });
 
                 const TRIP_CONFIG = {
@@ -137,12 +120,14 @@
                 };
 
                 const fetchTrips = async () => {
-                    const { data } = await _supabase.from('trips').select('*').order('time', { ascending: true });
-                    if (data) {
-                        tripsData.Seoul = data.filter(i => i.trip_name === 'Seoul');
-                        tripsData.Tokyo = data.filter(i => i.trip_name === 'Tokyo');
-                        tripsData.JapanNorthEast = data.filter(i => i.trip_name === 'JapanNorthEast');
-                    }
+                    try {
+                        const { data } = await _supabase.from('trips').select('*').order('time', { ascending: true });
+                        if (data) {
+                            tripsData.Seoul = data.filter(i => i.trip_name === 'Seoul');
+                            tripsData.Tokyo = data.filter(i => i.trip_name === 'Tokyo');
+                            tripsData.JapanNorthEast = data.filter(i => i.trip_name === 'JapanNorthEast');
+                        }
+                    } catch (e) { console.error(e); }
                 };
 
                 const enterTrip = (id) => {
@@ -169,14 +154,9 @@
 
                 const deleteItem = async (id) => {
                     if (confirm('確定要刪除此行程嗎？')) {
-                        const { error } = await _supabase.from('trips').delete().eq('id', id);
-                        if (!error) await fetchTrips();
+                        await _supabase.from('trips').delete().eq('id', id);
+                        await fetchTrips();
                     }
-                };
-
-                const openTranslate = () => {
-                    const lang = activeTrip.value === 'Seoul' ? 'ko' : 'ja';
-                    window.open(`https://translate.google.com/?sl=zh-TW&tl=${lang}`, '_blank');
                 };
 
                 const openGoogleMapsList = () => {
@@ -189,14 +169,13 @@
                     if (tripParam && TRIP_CONFIG[tripParam]) {
                         enterTrip(tripParam);
                     } else {
-                        view.value = 'main'; 
+                        view.value = 'main';
                     }
-                    fetchTrips();
                 });
 
                 return { 
                     view, currentTab, activeTrip, activeTripName, currentSchedule, 
-                    showModal, form, enterTrip, addItem, deleteItem, openTranslate, openGoogleMapsList 
+                    showModal, form, enterTrip, addItem, deleteItem, openGoogleMapsList 
                 };
             }
         }).mount('#app');
