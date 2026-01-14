@@ -208,9 +208,6 @@
             onMounted(() => {
                 const params = new URLSearchParams(window.location.search);
                 const tripParam = params.get('trip');
-                if (tripParam && TRIP_CONFIG[tripParam]) {
-                    enterTrip(tripParam);
-                }
                 fetchTrips();
             });
     
