@@ -63,7 +63,7 @@
                     <div class="flex-grow">
                         <h4 class="font-bold text-gray-800">{{ item.location }}</h4>
                         <div class="flex gap-4 mt-3">
-                            <a :href="'https://www.google.com/maps/search/' + encodeURIComponent(item.location)" target="_blank" class="text-[10px] text-blue-500 font-bold uppercase tracking-widest">導航</a>
+                            <a :href="'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(item.location)" target="_blank" class="text-[10px] text-blue-500 font-bold uppercase tracking-widest">導航</a>
                             <button @click="deleteItem(item.id)" class="text-[10px] text-red-300 font-bold uppercase">刪除</button>
                         </div>
                     </div>
@@ -76,7 +76,8 @@
             <div v-if="currentTab === 'split'" class="px-4">
                 <div class="bg-gray-900 rounded-[2.5rem] p-8 text-white shadow-2xl text-center">
                     <h3 class="text-2xl font-bold">Spliito 快速記帳</h3>
-                    <a href="https://spliito.com" target="_blank" class="mt-6 bg-white text-gray-900 px-10 py-3 rounded-2xl font-black text-sm inline-block tracking-wide">立即開啟</a>
+                    <p class="text-gray-400 text-sm mt-4 mb-8">與團員即時同步開支</p>
+                    <a :href="currentSpliitoLink" target="_blank" class="bg-white text-gray-900 px-10 py-3 rounded-2xl font-black text-sm inline-block tracking-wide">立即開啟</a>
                 </div>
             </div>
         </div>
@@ -114,20 +115,28 @@
                 const tripsData = reactive({ 'Seoul': [], 'Tokyo': [], 'JapanNorthEast': [] });
 
                 const TRIP_CONFIG = {
-                    'Seoul': '🇰🇷 \'26 Mar Seoul 7D6N',
-                    'Tokyo': '🇯🇵 \'26 Mar Tokyo 5D4N',
-                    'JapanNorthEast': '🇯🇵 \'26 Mar 青森仙台盛岡 5D4N'
+                    'Seoul': { 
+                        name: '🇰🇷 \'26 Mar Seoul 7D6N', 
+                        split: 'https://spliito.com/group/01KDZPAG11CXR5SH9XEHCZ3DVX' 
+                    },
+                    'Tokyo': { 
+                        name: '🇯🇵 \'26 Mar Tokyo 5D4N', 
+                        split: 'https://spliito.com/group/01KE036WEZZKSFRFVG33KNQEB8',
+                        map: 'https://maps.app.goo.gl/S4kQ8W9uWp8Z2N4G6' // 假設這是您的 Google Saved List
+                    },
+                    'JapanNorthEast': { 
+                        name: '🇯🇵 \'26 Mar 青森仙台盛岡 5D4N',
+                        split: 'https://spliito.com' 
+                    }
                 };
 
                 const fetchTrips = async () => {
-                    try {
-                        const { data } = await _supabase.from('trips').select('*').order('time', { ascending: true });
-                        if (data) {
-                            tripsData.Seoul = data.filter(i => i.trip_name === 'Seoul');
-                            tripsData.Tokyo = data.filter(i => i.trip_name === 'Tokyo');
-                            tripsData.JapanNorthEast = data.filter(i => i.trip_name === 'JapanNorthEast');
-                        }
-                    } catch (e) { console.error(e); }
+                    const { data } = await _supabase.from('trips').select('*').order('time', { ascending: true });
+                    if (data) {
+                        tripsData.Seoul = data.filter(i => i.trip_name === 'Seoul');
+                        tripsData.Tokyo = data.filter(i => i.trip_name === 'Tokyo');
+                        tripsData.JapanNorthEast = data.filter(i => i.trip_name === 'JapanNorthEast');
+                    }
                 };
 
                 const enterTrip = (id) => {
@@ -136,8 +145,9 @@
                     fetchTrips();
                 };
 
-                const activeTripName = computed(() => TRIP_CONFIG[activeTrip.value] || '');
+                const activeTripName = computed(() => TRIP_CONFIG[activeTrip.value]?.name || '');
                 const currentSchedule = computed(() => tripsData[activeTrip.value] || []);
+                const currentSpliitoLink = computed(() => TRIP_CONFIG[activeTrip.value]?.split || 'https://spliito.com');
 
                 const addItem = async () => {
                     if (form.location && form.time) {
@@ -160,7 +170,8 @@
                 };
 
                 const openGoogleMapsList = () => {
-                    window.open('https://www.google.com/maps', '_blank');
+                    const mapUrl = TRIP_CONFIG[activeTrip.value]?.map || 'https://www.google.com/maps';
+                    window.open(mapUrl, '_blank');
                 };
 
                 onMounted(() => {
@@ -175,7 +186,7 @@
 
                 return { 
                     view, currentTab, activeTrip, activeTripName, currentSchedule, 
-                    showModal, form, enterTrip, addItem, deleteItem, openGoogleMapsList 
+                    currentSpliitoLink, showModal, form, enterTrip, addItem, deleteItem, openGoogleMapsList 
                 };
             }
         }).mount('#app');
