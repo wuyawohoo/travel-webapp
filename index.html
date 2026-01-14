@@ -10,88 +10,95 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         .ios-blur { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-        body { background-color: #f2f2f7; font-family: -apple-system, sans-serif; overflow-x: hidden; }
+        body { background-color: #fadadd; font-family: -apple-system, sans-serif; overflow-x: hidden; }
         .trip-card:active { scale: 0.98; transition: 0.2s; }
         [v-cloak] { display: none; }
+        .iframe-container { height: calc(100vh - 200px); width: 100%; border: none; }
+        /* 輔助色定義：Dusty Blue 灰藍色 */
+        .text-helper { color: #7A91B1; } 
+        .bg-helper { background-color: #7A91B1; }
     </style>
 </head>
 <body>
-    <div id="app" v-cloak class="max-w-md mx-auto min-h-screen relative flex flex-col shadow-2xl bg-[#f2f2f7]">
+    <div id="app" v-cloak class="max-w-md mx-auto min-h-screen relative flex flex-col shadow-2xl bg-[#fadadd]">
         
         <div v-if="view === 'main'" class="p-8">
             <h1 class="text-4xl font-black mb-2 mt-12 text-gray-800">Karina's Trip Planner🤍</h1>
-            <p class="text-gray-400 mb-10">Select a trip to start planning.</p>
+            <p class="text-gray-500 mb-10 italic">Your travel diaries start here.</p>
             
             <div class="space-y-4">
-                <div @click="enterTrip('Seoul')" class="trip-card group relative bg-white rounded-[2rem] p-6 shadow-xl border border-blue-50 cursor-pointer overflow-hidden transition-all">
-                    <div class="absolute right-[-20px] top-[-20px] text-blue-50 text-8xl font-bold opacity-20">KR</div>
-                    <h2 class="text-2xl font-bold text-gray-800">🇰🇷 '26 Mar Seoul 7D6N</h2>
-                    <p class="text-blue-500 text-sm font-medium mt-1">with Annette</p>
+                <div @click="enterTrip('Seoul')" class="trip-card group relative bg-white/90 rounded-[2rem] p-6 shadow-xl border border-white cursor-pointer transition-all">
+                    <div class="absolute right-[-10px] top-[-10px] text-6xl opacity-20">🇰🇷</div>
+                    <h2 class="text-2xl font-bold text-gray-800">Seoul 7D6N</h2>
+                    <p class="text-helper text-sm font-semibold mt-1">with Annette</p>
                 </div>
 
-                <div @click="enterTrip('Tokyo')" class="trip-card group relative bg-white rounded-[2rem] p-6 shadow-xl border border-indigo-50 cursor-pointer overflow-hidden transition-all">
-                    <div class="absolute right-[-20px] top-[-20px] text-indigo-50 text-8xl font-bold opacity-20">JP</div>
-                    <h2 class="text-2xl font-bold text-gray-800">🇯🇵 '26 Mar Tokyo 5D4N</h2>
-                    <p class="text-indigo-600 text-sm font-medium mt-1">with Cherry</p>
+                <div @click="enterTrip('Tokyo')" class="trip-card group relative bg-white/90 rounded-[2rem] p-6 shadow-xl border border-white cursor-pointer transition-all">
+                    <div class="absolute right-[-10px] top-[-10px] text-6xl opacity-20">🇯🇵</div>
+                    <h2 class="text-2xl font-bold text-gray-800">Tokyo 5D4N</h2>
+                    <p class="text-helper text-sm font-semibold mt-1">with Cherry</p>
                 </div>
 
-                <div @click="enterTrip('JapanNorthEast')" class="trip-card group relative bg-white rounded-[2rem] p-6 shadow-xl border border-emerald-50 cursor-pointer overflow-hidden transition-all">
-                    <div class="absolute right-[-20px] top-[-20px] text-emerald-50 text-8xl font-bold opacity-20">JP</div>
-                    <h2 class="text-2xl font-bold text-gray-800">🇯🇵 '26 Mar 青森仙台盛岡 5D4N</h2>
-                    <p class="text-emerald-600 text-sm font-medium mt-1">with Dad</p>
+                <div @click="enterTrip('JapanNorthEast')" class="trip-card group relative bg-white/90 rounded-[2rem] p-6 shadow-xl border border-white cursor-pointer transition-all">
+                    <div class="absolute right-[-10px] top-[-10px] text-6xl opacity-20">🇯🇵</div>
+                    <h2 class="text-2xl font-bold text-gray-800">Aomori Sendai 5D4N</h2>
+                    <p class="text-helper text-sm font-semibold mt-1">with Dad</p>
                 </div>
             </div>
         </div>
 
-        <div v-if="view === 'trip'" class="flex-grow pb-32">
+        <div v-if="view === 'trip'" class="flex-grow flex flex-col">
             <div class="sticky top-0 z-20 bg-white/80 ios-blur p-4 flex items-center justify-between border-b">
                 <button @click="view = 'main'" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100"><i class="fas fa-home text-gray-600"></i></button>
-                <h2 class="font-bold text-lg text-gray-800">{{ activeTripName }}</h2>
-                <button @click="openGoogleMapsList" class="w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 text-blue-600"><i class="fas fa-map-marked-alt"></i></button>
+                <h2 class="font-bold text-lg text-gray-800">{{ activeTripIcon }} {{ activeTripSimpleName }}</h2>
+                <div class="flex gap-2">
+                    <button @click="openTranslate" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 text-gray-600"><i class="fas fa-language"></i></button>
+                    <button @click="openGoogleMapsList" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 text-gray-600"><i class="fas fa-map-marked-alt"></i></button>
+                </div>
             </div>
 
-            <div class="flex p-1.5 bg-gray-200/50 rounded-2xl m-4">
-                <button @click="currentTab = 'schedule'" :class="currentTab === 'schedule' ? 'bg-white shadow text-blue-600' : 'text-gray-500'" class="flex-1 py-2 rounded-xl text-sm font-bold transition-all">行程表</button>
-                <button @click="currentTab = 'split'" :class="currentTab === 'split' ? 'bg-white shadow text-blue-600' : 'text-gray-500'" class="flex-1 py-2 rounded-xl text-sm font-bold transition-all">分帳</button>
+            <div class="flex p-1.5 bg-gray-800/5 rounded-2xl m-4">
+                <button @click="currentTab = 'schedule'" :class="currentTab === 'schedule' ? 'bg-white shadow text-gray-800' : 'text-gray-400'" class="flex-1 py-2 rounded-xl text-xl transition-all">
+                    📍 <span class="text-xs font-bold block">Schedule</span>
+                </button>
+                <button @click="currentTab = 'split'" :class="currentTab === 'split' ? 'bg-white shadow text-gray-800' : 'text-gray-400'" class="flex-1 py-2 rounded-xl text-xl transition-all">
+                    💰 <span class="text-xs font-bold block">Split</span>
+                </button>
             </div>
 
-            <div v-if="currentTab === 'schedule'" class="px-4 space-y-4">
-                <div v-for="item in currentSchedule" :key="item.id" class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex gap-4">
+            <div v-if="currentTab === 'schedule'" class="px-4 space-y-4 pb-32">
+                <div v-for="item in currentSchedule" :key="item.id" class="bg-white/90 rounded-3xl p-5 shadow-sm border border-white flex gap-4">
                     <div class="flex flex-col items-center min-w-[50px]">
-                        <span class="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-lg uppercase tracking-tighter">{{ item.time }}</span>
+                        <span class="text-[10px] font-black text-white bg-[#7A91B1] px-2 py-1 rounded-lg uppercase">{{ item.time }}</span>
                     </div>
                     <div class="flex-grow">
                         <h4 class="font-bold text-gray-800">{{ item.location }}</h4>
                         <div class="flex gap-4 mt-3">
-                            <a :href="'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(item.location)" target="_blank" class="text-[10px] text-blue-500 font-bold uppercase tracking-widest">導航</a>
-                            <button @click="deleteItem(item.id)" class="text-[10px] text-red-300 font-bold uppercase">刪除</button>
+                            <a :href="'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(item.location)" target="_blank" class="text-[10px] text-helper font-bold uppercase tracking-widest">Guide</a>
+                            <button @click="deleteItem(item.id)" class="text-[10px] text-red-300 font-bold uppercase">Delete</button>
                         </div>
                     </div>
                 </div>
-                <button @click="showModal = true" class="w-full py-5 bg-white border-2 border-dashed border-gray-200 rounded-3xl text-gray-400 font-bold">
-                    <i class="fas fa-plus-circle mr-2"></i>新增行程
+                <button @click="showModal = true" class="w-full py-5 bg-white/50 border-2 border-dashed border-white rounded-3xl text-gray-500 font-bold">
+                    <i class="fas fa-plus-circle mr-2"></i>Add Plan
                 </button>
             </div>
 
-            <div v-if="currentTab === 'split'" class="px-4">
-                <div class="bg-gray-900 rounded-[2.5rem] p-8 text-white shadow-2xl text-center">
-                    <h3 class="text-2xl font-bold">Spliito 快速記帳</h3>
-                    <p class="text-gray-400 text-sm mt-4 mb-8">與團員即時同步開支</p>
-                    <a :href="currentSpliitoLink" target="_blank" class="bg-white text-gray-900 px-10 py-3 rounded-2xl font-black text-sm inline-block tracking-wide">立即開啟</a>
-                </div>
+            <div v-if="currentTab === 'split'" class="flex-grow">
+                <iframe :src="currentSpliitoLink" class="iframe-container" allow="payment"></iframe>
             </div>
         </div>
 
-        <div v-if="showModal" class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="showModal = false">
+        <div v-if="showModal" class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm" @click.self="showModal = false">
             <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl">
-                <h3 class="text-xl font-bold mb-6 text-gray-800 text-center">在哪裡碰面？</h3>
+                <h3 class="text-xl font-bold mb-6 text-gray-800 text-center">New Plan</h3>
                 <div class="space-y-4">
-                    <input v-model="form.time" type="time" class="w-full bg-gray-100 p-4 rounded-2xl border-none">
-                    <input v-model="form.location" type="text" placeholder="目的地名稱" class="w-full bg-gray-100 p-4 rounded-2xl border-none">
+                    <input v-model="form.time" type="time" class="w-full bg-gray-50 p-4 rounded-2xl border-none">
+                    <input v-model="form.location" type="text" placeholder="Where to go?" class="w-full bg-gray-50 p-4 rounded-2xl border-none">
                 </div>
                 <div class="flex gap-4 mt-8">
-                    <button @click="showModal = false" class="flex-1 py-4 text-gray-400 font-bold">取消</button>
-                    <button @click="addItem" class="flex-[2] py-4 bg-blue-600 text-white rounded-2xl font-bold shadow-lg">確認加入</button>
+                    <button @click="showModal = false" class="flex-1 py-4 text-gray-400 font-bold">Cancel</button>
+                    <button @click="addItem" class="flex-[2] py-4 bg-[#7A91B1] text-white rounded-2xl font-bold shadow-lg">Confirm</button>
                 </div>
             </div>
         </div>
@@ -110,24 +117,14 @@
                 const view = ref('main');
                 const currentTab = ref('schedule');
                 const activeTrip = ref('');
-                const showModal = ref(false); 
+                const showModal = ref(false);
                 const form = reactive({ time: '', location: '' });
                 const tripsData = reactive({ 'Seoul': [], 'Tokyo': [], 'JapanNorthEast': [] });
 
                 const TRIP_CONFIG = {
-                    'Seoul': { 
-                        name: '🇰🇷 \'26 Mar Seoul 7D6N', 
-                        split: 'https://spliito.com/group/01KDZPAG11CXR5SH9XEHCZ3DVX' 
-                    },
-                    'Tokyo': { 
-                        name: '🇯🇵 \'26 Mar Tokyo 5D4N', 
-                        split: 'https://spliito.com/group/01KE036WEZZKSFRFVG33KNQEB8',
-                        map: 'https://maps.app.goo.gl/S4kQ8W9uWp8Z2N4G6' // 假設這是您的 Google Saved List
-                    },
-                    'JapanNorthEast': { 
-                        name: '🇯🇵 \'26 Mar 青森仙台盛岡 5D4N',
-                        split: 'https://spliito.com' 
-                    }
+                    'Seoul': { icon: '🇰🇷', name: 'Seoul', split: 'https://spliito.com/group/01KDZPAG11CXR5SH9XEHCZ3DVX' },
+                    'Tokyo': { icon: '🇯🇵', name: 'Tokyo', split: 'https://spliito.com/group/01KE036WEZZKSFRFVG33KNQEB8', map: 'https://www.google.com/maps' },
+                    'JapanNorthEast': { icon: '🇯🇵', name: 'Aomori', split: 'https://spliito.com' }
                 };
 
                 const fetchTrips = async () => {
@@ -145,7 +142,8 @@
                     fetchTrips();
                 };
 
-                const activeTripName = computed(() => TRIP_CONFIG[activeTrip.value]?.name || '');
+                const activeTripIcon = computed(() => TRIP_CONFIG[activeTrip.value]?.icon || '');
+                const activeTripSimpleName = computed(() => TRIP_CONFIG[activeTrip.value]?.name || '');
                 const currentSchedule = computed(() => tripsData[activeTrip.value] || []);
                 const currentSpliitoLink = computed(() => TRIP_CONFIG[activeTrip.value]?.split || 'https://spliito.com');
 
@@ -154,19 +152,20 @@
                         const { error } = await _supabase.from('trips').insert([
                             { trip_name: activeTrip.value, location: form.location, time: form.time }
                         ]);
-                        if (!error) {
-                            await fetchTrips();
-                            form.location = ''; form.time = '';
-                            showModal.value = false;
-                        }
+                        if (!error) { await fetchTrips(); form.location = ''; form.time = ''; showModal.value = false; }
                     }
                 };
 
                 const deleteItem = async (id) => {
-                    if (confirm('確定要刪除此行程嗎？')) {
+                    if (confirm('Delete this plan?')) {
                         await _supabase.from('trips').delete().eq('id', id);
                         await fetchTrips();
                     }
+                };
+
+                const openTranslate = () => {
+                    const lang = activeTrip.value === 'Seoul' ? 'ko' : 'ja';
+                    window.open(`https://translate.google.com/?sl=zh-TW&tl=${lang}`, '_blank');
                 };
 
                 const openGoogleMapsList = () => {
@@ -177,16 +176,12 @@
                 onMounted(() => {
                     const params = new URLSearchParams(window.location.search);
                     const tripParam = params.get('trip');
-                    if (tripParam && TRIP_CONFIG[tripParam]) {
-                        enterTrip(tripParam);
-                    } else {
-                        view.value = 'main';
-                    }
+                    if (tripParam && TRIP_CONFIG[tripParam]) enterTrip(tripParam);
                 });
 
                 return { 
-                    view, currentTab, activeTrip, activeTripName, currentSchedule, 
-                    currentSpliitoLink, showModal, form, enterTrip, addItem, deleteItem, openGoogleMapsList 
+                    view, currentTab, activeTrip, activeTripIcon, activeTripSimpleName, 
+                    currentSchedule, currentSpliitoLink, showModal, form, enterTrip, addItem, deleteItem, openTranslate, openGoogleMapsList 
                 };
             }
         }).mount('#app');
