@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>我的旅遊助手 2026</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .ios-blur { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        body { background-color: #f2f2f7; font-family: -apple-system, sans-serif; }
+        .tab-shadow { box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.08); }
+    </style>
+</head>
+<body>
+    <div id="app" class="max-w-md mx-auto min-h-screen relative flex flex-col">
+        
+        <div v-if="view === 'main'" class="p-8">
+            <h1 class="text-4xl font-black mb-2 mt-12 text-gray-800">Hello!</h1>
+            <p class="text-gray-500 mb-10">準備好你的 2026 旅程了嗎？</p>
+            
+            <div class="space-y-4">
+                <div @click="enterTrip('Seoul')" class="group relative bg-white rounded-[2rem] p-6 shadow-xl border border-blue-50 cursor-pointer overflow-hidden transition-all active:scale-95">
+                    <div class="absolute right-[-20px] top-[-20px] text-blue-50 text-8xl font-bold opacity-20">KR</div>
+                    <h2 class="text-2xl font-bold text-gray-800">🇰🇷 首爾探險</h2>
+                    <p class="text-blue-500 text-sm font-medium mt-1">大學同學群組</p>
+                </div>
+
+                <div @click="enterTrip('Tokyo')" class="group relative bg-white rounded-[2rem] p-6 shadow-xl border border-indigo-50 cursor-pointer overflow-hidden transition-all active:scale-95">
+                    <div class="absolute right-[-20px] top-[-20px] text-indigo-50 text-8xl font-bold opacity-20">JP</div>
+                    <h2 class="text-2xl font-bold text-gray-800">🇯🇵 東京吃貨團</h2>
+                    <p class="text-indigo-600 text-sm font-medium mt-1">家人/親戚群組</p>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="view === 'trip'" class="flex-grow pb-24">
+            <div class="sticky top-0 z-20 bg-white/80 ios-blur p-4 flex items-center justify-between border-b">
+                <button @click="view = 'main'" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100"><i class="fas fa-home text-gray-600"></i></button>
+                <h2 class="font-bold text-lg text-gray-800">{{ activeTripName }}</h2>
+                <button @click="openGoogleMapsList" class="w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 text-blue-600"><i class="fas fa-map-marked-alt"></i></button>
+            </div>
+
+            <div class="flex p-1.5 bg-gray-200/50 rounded-2xl m-4 backdrop-blur">
+                <button @click="currentTab = 'schedule'" :class="currentTab === 'schedule' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500'" class="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all">行程行程</button>
+                <button @click="currentTab = 'split'" :class="currentTab === 'split' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500'" class="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all">分帳記帳</button>
+            </div>
+
+            <div v-show="currentTab === 'schedule'" class="px-4 space-y-4">
+                <div v-for="(item, index) in currentSchedule" :key="index" class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex gap-4">
+                    <div class="flex flex-col items-center justify-start py-1">
+                        <span class="text-xs font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">{{ item.time }}</span>
+                        <div class="w-0.5 h-full bg-blue-100 my-2"></div>
+                    </div>
+                    <div class="flex-grow">
+                        <h4 class="font-bold text-gray-800 text-lg">{{ item.location }}</h4>
+                        <p class="text-sm text-gray-400 mt-1">{{ item.note }}</p>
+                        <div class="flex gap-2 mt-3">
+                            <a :href="'https://www.google.com/maps/search/?api=1&query=' + item.location" target="_blank" class="text-xs bg-gray-50 text-gray-600 px-3 py-1.5 rounded-full border">導航</a>
+                            <button @click="deleteItem(index)" class="text-xs text-red-400 px-3 py-1.5 ml-auto">刪除</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <button @click="showModal = true" class="w-full py-5 bg-white border-2 border-dashed border-gray-200 rounded-3xl text-gray-400 font-bold hover:bg-gray-50 transition">
+                    <i class="fas fa-plus-circle mr-2"></i>新增行程目的地
+                </button>
+            </div>
+
+            <div v-show="currentTab === 'split'" class="px-4">
+                <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-[2.5rem] p-8 text-white shadow-2xl mb-6">
+                    <p class="text-gray-400 text-sm">連動外部 App</p>
+                    <h3 class="text-2xl font-bold mt-1">Spliito 快速記帳</h3>
+                    <a href="https://spliito.com" target="_blank" class="mt-6 inline-block bg-white text-gray-900 px-8 py-3 rounded-2xl font-black text-sm tracking-wide transition-transform active:scale-95">點擊開啟</a>
+                </div>
+                <div class="bg-white rounded-3xl p-6 shadow-sm border">
+                    <h4 class="font-bold text-gray-800 mb-4">使用說明</h4>
+                    <p class="text-sm text-gray-500 leading-relaxed">請將 Spliito 群組連結貼給朋友，這裡主要作為行程整合使用。未來可串接 API 自動顯示餘額。</p>
+                </div>
+            </div>
+        </div>
+
+        <nav v-if="view === 'trip'" class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[320px] bg-gray-900/90 ios-blur rounded-full px-8 py-4 shadow-2xl z-50 flex justify-between items-center border border-white/10">
+            <button @click="openTranslate" class="text-white flex items-center gap-2">
+                <i class="fas fa-language text-xl text-blue-400"></i>
+                <span class="text-sm font-bold">開啟 Google 翻譯</span>
+            </button>
+            <div class="w-px h-4 bg-gray-700"></div>
+            <button @click="currentTab = 'schedule'" class="text-white">
+                <i class="fas fa-map-pin text-lg"></i>
+            </button>
+        </nav>
+
+        <div v-if="showModal" class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="showModal = false">
+            <div class="bg-white w-full max-w-sm rounded-[2rem] p-8 shadow-2xl">
+                <h3 class="text-xl font-bold mb-6 text-gray-800">在哪裡碰面？</h3>
+                <input v-model="form.time" type="time" class="w-full bg-gray-100 p-4 rounded-2xl mb-4 border-none focus:ring-2 focus:ring-blue-500">
+                <input v-model="form.location" type="text" placeholder="目的地名稱" class="w-full bg-gray-100 p-4 rounded-2xl mb-6 border-none focus:ring-2 focus:ring-blue-500">
+                <div class="flex gap-3">
+                    <button @click="showModal = false" class="flex-1 py-4 text-gray-500 font-bold">取消</button>
+                    <button @click="addItem" class="flex-[2] py-4 bg-blue-600 text-white rounded-2xl font-bold shadow-lg shadow-blue-200">確認加入</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const { createApp, ref, reactive, computed } = Vue;
+
+        createApp({
+            setup() {
+                const view = ref('main');
+                const currentTab = ref('schedule');
+                const activeTrip = ref('');
+                const showModal = ref(false);
+                const form = reactive({ time: '', location: '', note: '' });
+
+                // 初始假資料 (之後連動 Supabase)
+                const tripsData = reactive({
+                    'Seoul': [
+                        { time: '12:00', location: '仁川機場 (ICN)', note: '領取網卡' },
+                        { time: '15:00', location: '明洞商圈', note: '換韓幣' }
+                    ],
+                    'Tokyo': [
+                        { time: '10:00', location: '成田機場', note: '搭 Skyliner' },
+                        { time: '19:00', location: '新宿歌舞伎町', note: '晚餐吃燒肉' }
+                    ]
+                });
+
+                const enterTrip = (id) => {
+                    activeTrip.value = id;
+                    view.value = 'trip';
+                };
+
+                const activeTripName = computed(() => activeTrip.value === 'Seoul' ? '🇰🇷 首爾探險' : '🇯🇵 東京吃貨團');
+                const currentSchedule = computed(() => tripsData[activeTrip.value] || []);
+
+                const addItem = () => {
+                    if (form.location && form.time) {
+                        tripsData[activeTrip.value].push({ ...form });
+                        form.location = ''; form.time = '';
+                        showModal.value = false;
+                    }
+                };
+
+                const deleteItem = (index) => {
+                    tripsData[activeTrip.value].splice(index, 1);
+                };
+
+                const openTranslate = () => {
+                    const lang = activeTrip.value === 'Seoul' ? 'ko' : 'ja';
+                    window.open(`https://translate.google.com/?sl=zh-TW&tl=${lang}`, '_blank');
+                };
+
+                const openGoogleMapsList = () => {
+                    // 你可以把你的 Google Maps 清單連結貼在這裡
+                    window.open('https://maps.app.goo.gl/XXXXXXX', '_blank');
+                };
+
+                // 自動判斷 URL (例如網址後面加 ?trip=Seoul)
+                const params = new URLSearchParams(window.location.search);
+                const tripParam = params.get('trip');
+                if (tripParam && tripsData[tripParam]) {
+                    enterTrip(tripParam);
+                }
+
+                return { view, currentTab, activeTrip, activeTripName, currentSchedule, showModal, form, enterTrip, addItem, deleteItem, openTranslate, openGoogleMapsList };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
