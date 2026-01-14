@@ -194,24 +194,47 @@
                     tripsData.trips = t.data || []; tripsData.wishlist = w.data || [];
                 };
 
-                const addItem = async () => {
-                    let payload = {};
-                    if (modalMode.value === 'schedule') {
-                        payload = { 
-                            trip_name: activeTrip.value, location: form.location, time: form.time, date: form.date, icon: form.icon, 
-                            is_hotel: form.is_hotel, is_transport: form.is_transport, transport_no: form.transport_no, 
-                            end_location: form.end_location, arrival_time: form.arrival_time 
-                        };
-                        const { error } = await _supabase.from('trips').insert([payload]);
-                        if (error) { alert("儲存行程失敗: " + error.message); return; }
-                    } else {
-                        payload = { trip_name: activeTrip.value, item_name: form.item_name, owner: form.owner, category: form.category };
-                        const { error } = await _supabase.from('wishlist').insert([payload]);
-                        if (error) { alert("儲存清單失敗: " + error.message); return; }
-                    }
-                    await fetchData(); showModal.value = false;
-                    Object.assign(form, { location: '', end_location: '', transport_no: '', item_name: '', is_hotel: false, is_transport: false });
-                };
+                // 請確認 addItem 函式這段邏輯是這樣的：
+const addItem = async () => {
+    console.log("正在嘗試提交資料...", form); // 調試用
+    let payload = {};
+    try {
+        if (modalMode.value === 'schedule') {
+            payload = { 
+                trip_name: activeTrip.value, 
+                location: form.location || '未命名地點', 
+                time: form.time || '00:00', 
+                date: form.date || new Date().toISOString().split('T')[0], 
+                icon: form.icon, 
+                is_hotel: !!form.is_hotel, 
+                is_transport: !!form.is_transport, 
+                transport_no: form.transport_no || '', 
+                end_location: form.end_location || '', 
+                arrival_time: form.arrival_time || null 
+            };
+            const { data, error } = await _supabase.from('trips').insert([payload]);
+            if (error) throw error;
+        } else {
+            payload = { 
+                trip_name: activeTrip.value, 
+                item_name: form.item_name, 
+                owner: form.owner, 
+                category: form.category 
+            };
+            const { data, error } = await _supabase.from('wishlist').insert([payload]);
+            if (error) throw error;
+        }
+        
+        alert("儲成功！"); // 成功提示
+        await fetchData(); 
+        showModal.value = false;
+        // 重置表單
+        Object.assign(form, { location: '', end_location: '', transport_no: '', item_name: '', is_hotel: false, is_transport: false });
+    } catch (err) {
+        console.error("提交失敗:", err);
+        alert("發生錯誤: " + err.message);
+    }
+};
 
                 return { 
                     view, currentTab, activeTrip, TRIP_CONFIG, showModal, modalMode, form, tripsData,
