@@ -14,8 +14,7 @@
         .trip-card:active { scale: 0.98; transition: 0.2s; }
         [v-cloak] { display: none; }
         .day-badge { background-color: #7A91B1; color: white; padding: 2px 8px; border-radius: 8px; font-size: 10px; font-weight: bold; }
-        .transport-card { background: linear-gradient(135deg, #ffffff 0%, #f9fbfc 100%); }
-        /* 讓嵌入的 Spliito 撐滿剩餘空間 */
+        .transport-card { background: linear-gradient(135deg, #ffffff 0%, #f9fbfc 100%); border: 1px solid #e2e8f0; }
         .iframe-container { flex-grow: 1; width: 100%; border: none; height: calc(100vh - 180px); }
     </style>
 </head>
@@ -35,7 +34,7 @@
         </div>
 
         <div v-if="view === 'main'" class="p-8">
-            <h1 class="text-4xl font-black mb-2 mt-12 text-gray-800">Karina's Trip Planner🤍</h1>
+            <h1 class="text-4xl font-black mb-2 mt-12 text-gray-800">Karina's Planner🤍</h1>
             <p class="text-gray-500 mb-10 italic">Spring Collection 2026</p>
             <div class="space-y-4">
                 <div v-for="(info, id) in TRIP_CONFIG" :key="id" @click="enterTrip(id)" class="trip-card relative bg-white rounded-[2rem] p-6 shadow-lg border border-pink-100 cursor-pointer">
@@ -49,31 +48,31 @@
 
         <div v-if="view === 'trip'" class="flex-grow flex flex-col h-full">
             <div class="flex p-1.5 bg-[#fadadd] rounded-2xl m-4 shadow-inner">
-                <button v-for="tab in tabs" :key="tab.id" @click="currentTab = tab.id" :class="currentTab === tab.id ? 'bg-white shadow text-gray-800' : 'text-gray-500'" class="flex-1 py-2 rounded-xl text-lg transition-all text-center">
-                    {{ tab.icon }} <span class="text-[10px] font-bold block uppercase">{{ isChinese ? tab.cn : tab.en }}</span>
+                <button v-for="tab in tabs" :key="tab.id" @click="currentTab = tab.id" :class="currentTab === tab.id ? 'bg-white shadow text-gray-800' : 'text-gray-500'" class="flex-1 py-2 rounded-xl text-xs font-bold transition-all text-center">
+                    {{ tab.icon }} <span class="block uppercase mt-1">{{ isChinese ? tab.cn : tab.en }}</span>
                 </button>
             </div>
 
-            <div v-if="currentTab === 'schedule'" class="px-4 pb-32 overflow-y-auto">
+            <div v-show="currentTab === 'schedule'" class="px-4 pb-32 overflow-y-auto">
                 <div v-if="activeHotel" class="mb-4 bg-white/80 p-4 rounded-3xl border border-pink-200 flex items-center gap-3">
                     <div class="text-2xl">🏨</div>
-                    <div class="flex-grow"><p class="text-[10px] font-bold text-[#7A91B1] uppercase">今晚入住</p><p class="font-bold text-gray-800">{{ activeHotel }}</p></div>
-                    <button @click="directToMap(activeHotel)" class="bg-[#7A91B1] text-white p-2 rounded-xl text-xs px-3 font-bold">導航</button>
+                    <div class="flex-grow"><p class="text-[10px] font-bold text-[#7A91B1]">STAY TONIGHT</p><p class="font-bold text-gray-800">{{ activeHotel }}</p></div>
+                    <button @click="directToMap(activeHotel)" class="bg-[#7A91B1] text-white p-2 rounded-xl text-xs px-3 font-bold shadow-sm">導航</button>
                 </div>
 
                 <div class="space-y-4">
                     <div v-for="item in currentSchedule" :key="item.id">
-                        <div v-if="item.is_transport" class="transport-card rounded-3xl p-5 shadow-sm border border-blue-50 flex flex-col gap-2">
+                        <div v-if="item.is_transport" class="transport-card rounded-3xl p-5 shadow-sm flex flex-col gap-2">
                             <div class="flex justify-between items-center border-b border-gray-100 pb-2">
-                                <div class="flex items-center gap-2"><span class="text-xl">{{ item.icon }}</span><span class="text-xs font-black text-[#7A91B1] uppercase">{{ item.transport_no }}</span></div>
+                                <div class="flex items-center gap-2"><span class="text-xl">{{ item.icon }}</span><span class="text-xs font-black text-[#7A91B1]">{{ item.transport_no }}</span></div>
                                 <span class="day-badge">Day {{ calculateDay(item.date) }}</span>
                             </div>
                             <div class="flex items-center justify-between px-2 py-1 text-center">
-                                <div><p class="text-[9px] text-gray-400 font-bold">DEPARTURE</p><p class="font-black text-gray-700">{{ item.time }}</p><p class="text-xs font-bold">{{ item.location }}</p></div>
-                                <i class="fas fa-long-arrow-alt-right text-gray-300"></i>
-                                <div><p class="text-[9px] text-gray-400 font-bold">ARRIVAL</p><p class="font-black text-gray-700">{{ item.arrival_time }}</p><p class="text-xs font-bold">{{ item.end_location }}</p></div>
+                                <div><p class="text-[9px] text-gray-400 font-bold">DEPART</p><p class="font-black text-gray-700 text-lg">{{ item.time }}</p><p class="text-xs font-bold">{{ item.location }}</p></div>
+                                <i class="fas fa-long-arrow-alt-right text-[#fadadd]"></i>
+                                <div><p class="text-[9px] text-gray-400 font-bold">ARRIVE</p><p class="font-black text-gray-700 text-lg">{{ item.arrival_time }}</p><p class="text-xs font-bold">{{ item.end_location }}</p></div>
                             </div>
-                            <button @click="deleteItem(item.id, 'trips')" class="text-[9px] text-red-200 font-bold uppercase mt-1 text-right">刪除交通</button>
+                            <button @click="deleteItem(item.id, 'trips')" class="text-[9px] text-red-200 font-bold uppercase mt-1 text-right">Delete</button>
                         </div>
                         <div v-else class="bg-white rounded-3xl p-5 shadow-sm flex gap-4 border border-gray-50">
                             <div class="flex flex-col items-center min-w-[60px]"><span class="day-badge mb-1">Day {{ calculateDay(item.date) }}</span><span class="text-[10px] font-black text-[#7A91B1]">{{ item.time }}</span></div>
@@ -81,7 +80,7 @@
                                 <div class="flex items-center gap-2"><span>{{ item.icon }}</span><h4 class="font-bold text-gray-800">{{ item.location }}</h4></div>
                                 <div class="flex gap-3 mt-3">
                                     <button @click="directToMap(item.location)" class="text-[10px] text-[#7A91B1] font-bold uppercase flex items-center gap-1"><i class="fas fa-location-arrow"></i> 立即導航</button>
-                                    <button @click="deleteItem(item.id, 'trips')" class="text-[10px] text-red-200 font-bold uppercase ml-auto">刪除</button>
+                                    <button @click="deleteItem(item.id, 'trips')" class="text-[10px] text-red-200 font-bold uppercase ml-auto">Delete</button>
                                 </div>
                             </div>
                         </div>
@@ -90,7 +89,7 @@
                 </div>
             </div>
 
-            <div v-if="currentTab === 'wishlist'" class="px-4 pb-32 overflow-y-auto">
+            <div v-show="currentTab === 'wishlist'" class="px-4 pb-32 overflow-y-auto">
                 <div class="space-y-3">
                     <div v-for="item in currentWishlist" :key="item.id" class="bg-white rounded-2xl p-4 shadow-sm flex justify-between items-center border border-gray-50">
                         <div class="flex items-center gap-3">
@@ -116,7 +115,8 @@
                         <button @click="form.is_transport = true; form.icon = '✈️'" :class="form.is_transport ? 'bg-white shadow' : 'text-gray-400'" class="flex-1 py-2 rounded-xl text-xs font-bold transition-all">交通工具</button>
                     </div>
                     <div class="space-y-4">
-                        <input v-model="form.date" type="date" class="w-full bg-white p-4 rounded-2xl border-none shadow-sm text-sm shadow-inner">
+                        <input v-model="form.date" type="date" class="w-full bg-white p-4 rounded-2xl border-none shadow-sm text-sm">
+                        
                         <div v-if="form.is_transport" class="space-y-4">
                             <div class="flex justify-between p-2 bg-white rounded-2xl shadow-sm">
                                 <button v-for="ico in ['✈️', '🚆', '🚌', '🚇', '🚢']" @click="form.icon = ico" :class="form.icon === ico ? 'bg-pink-100 scale-110' : ''" class="w-9 h-9 rounded-xl text-lg transition-all">{{ ico }}</button>
@@ -124,34 +124,41 @@
                             <input v-model="form.transport_no" type="text" placeholder="航班/車次編號" class="w-full bg-white p-4 rounded-2xl shadow-sm text-sm">
                             <div class="grid grid-cols-2 gap-2">
                                 <div class="space-y-1">
-                                    <span class="text-[9px] font-bold text-gray-400 uppercase">From 起點</span>
-                                    <input v-model="form.location" type="text" placeholder="起點" class="w-full bg-white p-3 rounded-xl shadow-sm text-sm">
-                                    <input v-model="form.time" type="time" class="w-full bg-white p-3 rounded-xl shadow-sm text-sm">
+                                    <span class="text-[9px] font-bold text-gray-400">起點 FROM</span>
+                                    <input v-model="form.location" type="text" class="w-full bg-white p-3 rounded-xl shadow-sm text-sm border-none">
+                                    <input v-model="form.time" type="time" class="w-full bg-white p-3 rounded-xl shadow-sm text-sm border-none">
                                 </div>
                                 <div class="space-y-1">
-                                    <span class="text-[9px] font-bold text-gray-400 uppercase">To 終點</span>
-                                    <input v-model="form.end_location" type="text" placeholder="終點" class="w-full bg-white p-3 rounded-xl shadow-sm text-sm">
-                                    <input v-model="form.arrival_time" type="time" class="w-full bg-white p-3 rounded-xl shadow-sm text-sm">
+                                    <span class="text-[9px] font-bold text-gray-400">終點 TO</span>
+                                    <input v-model="form.end_location" type="text" class="w-full bg-white p-3 rounded-xl shadow-sm text-sm border-none">
+                                    <input v-model="form.arrival_time" type="time" class="w-full bg-white p-3 rounded-xl shadow-sm text-sm border-none">
                                 </div>
                             </div>
                         </div>
+                        
                         <div v-else class="space-y-4">
-                            <input v-model="form.time" type="time" class="w-full bg-white p-4 rounded-2xl border-none shadow-sm text-sm">
+                            <input v-model="form.time" type="time" class="w-full bg-white p-4 rounded-2xl shadow-sm text-sm border-none">
                             <div class="flex justify-between p-2 bg-white rounded-2xl shadow-sm">
                                 <button v-for="ico in ['🍽️', '☕', '🛍️', '⛩️', '🏨', '📷']" @click="form.icon = ico" :class="form.icon === ico ? 'bg-pink-100 scale-110' : ''" class="w-9 h-9 rounded-xl text-lg transition-all">{{ ico }}</button>
                             </div>
-                            <input v-model="form.location" type="text" placeholder="去哪裡？" class="w-full bg-white p-4 rounded-2xl border-none shadow-sm text-sm">
+                            <input v-model="form.location" type="text" placeholder="地點名稱" class="w-full bg-white p-4 rounded-2xl shadow-sm text-sm border-none">
                             <label class="flex items-center gap-2 p-2 text-xs text-gray-500"><input type="checkbox" v-model="form.is_hotel"> 設為今晚飯店</label>
                         </div>
                     </div>
                 </div>
+
                 <div v-if="modalMode === 'wishlist'" class="space-y-4">
-                    <input v-model="form.item_name" type="text" placeholder="項目名稱" class="w-full bg-white p-4 rounded-2xl shadow-sm text-sm">
+                    <input v-model="form.item_name" type="text" placeholder="想要什麼？" class="w-full bg-white p-4 rounded-2xl shadow-sm text-sm border-none">
                     <div class="flex gap-2">
-                        <select v-model="form.owner" class="flex-1 bg-white p-4 rounded-2xl shadow-sm text-sm"><option value="大家">所有人</option><option value="Karina">Karina</option><option value="爸爸">爸爸</option></select>
-                        <select v-model="form.category" class="flex-1 bg-white p-4 rounded-2xl shadow-sm text-sm"><option value="Eat">必吃 🍽️</option><option value="Buy">必買 🛍️</option></select>
+                        <select v-model="form.owner" class="flex-1 bg-white p-4 rounded-2xl shadow-sm text-sm border-none">
+                            <option value="大家">所有人</option><option value="Karina">Karina</option><option value="爸爸">爸爸</option>
+                        </select>
+                        <select v-model="form.category" class="flex-1 bg-white p-4 rounded-2xl shadow-sm text-sm border-none">
+                            <option value="Eat">必吃 🍽️</option><option value="Buy">必買 🛍️</option>
+                        </select>
                     </div>
                 </div>
+
                 <div class="flex gap-4 mt-8">
                     <button @click="showModal = false" class="flex-1 py-4 text-gray-400 font-bold">取消</button>
                     <button @click="addItem" class="flex-[2] py-4 bg-[#7A91B1] text-white rounded-2xl font-bold shadow-lg">確定</button>
@@ -169,25 +176,38 @@
                 const view = ref('main'); const currentTab = ref('schedule'); const activeTrip = ref('');
                 const showModal = ref(false); const modalMode = ref('schedule');
                 const tripsData = reactive({ trips: [], wishlist: [] });
-                const form = reactive({ date: '', time: '', location: '', icon: '📍', is_hotel: false, is_transport: false, transport_no: '', end_location: '', arrival_time: '', item_name: '', owner: '大家', category: 'Eat' });
+                const form = reactive({ 
+                    date: new Date().toISOString().split('T')[0], time: '', location: '', icon: '📍', 
+                    is_hotel: false, is_transport: false, transport_no: '', end_location: '', arrival_time: '',
+                    item_name: '', owner: '大家', category: 'Eat' 
+                });
 
                 const TRIP_CONFIG = {
-                    'Seoul': { icon: '🇰🇷', displayName: 'Seoul 7D6N', sub: 'with Annette', date: "'26 March", start: '2026-03-20', spliito: 'https://spliito.com/group/01KDZPAG11CXR5SH9XEHCZ3DVX', map: 'https://www.google.com/maps1' },
-                    'Tokyo': { icon: '🇯🇵', displayName: 'Tokyo 5D4N', sub: 'with Cherry', date: "'26 March", start: '2026-03-25', spliito: 'https://spliito.com/group/01KE036WEZZKSFRFVG33KNQEB8', map: 'https://www.google.com/maps2' },
-                    'JapanNorthEast': { icon: '🇯🇵', displayName: '青森仙台 5天4夜', sub: '陪爸爸去旅行', date: "'26 三月", start: '2026-03-10', spliito: 'https://spliito.com', map: 'https://www.google.com/maps3' }
+                    'Seoul': { icon: '🇰🇷', displayName: 'Seoul 7D6N', sub: 'with Annette', date: "'26 March", start: '2026-03-20', spliito: 'https://spliito.com/group/01KDZPAG11CXR5SH9XEHCZ3DVX', map: 'https://maps.app.goo.gl/3fX3y' },
+                    'Tokyo': { icon: '🇯🇵', displayName: 'Tokyo 5D4N', sub: 'with Cherry', date: "'26 March", start: '2026-03-25', spliito: 'https://spliito.com/group/01KE036WEZZKSFRFVG33KNQEB8', map: 'https://maps.app.goo.gl/Tokyo' },
+                    'JapanNorthEast': { icon: '🇯🇵', displayName: '青森仙台 5D4Y', sub: '陪爸爸去旅行', date: "'26 三月", start: '2026-03-10', spliito: 'https://spliito.com', map: 'https://maps.app.goo.gl/Aomori' }
                 };
 
                 const fetchData = async () => {
                     const t = await _supabase.from('trips').select('*').eq('trip_name', activeTrip.value).order('date', {ascending: true}).order('time', {ascending: true});
-                    const w = await _supabase.from('wishlist').select('*').eq('trip_name', activeTrip.value);
+                    const w = await _supabase.from('wishlist').select('*').eq('trip_name', activeTrip.value).order('id', {ascending: false});
                     tripsData.trips = t.data || []; tripsData.wishlist = w.data || [];
                 };
 
                 const addItem = async () => {
+                    let payload = {};
                     if (modalMode.value === 'schedule') {
-                        await _supabase.from('trips').insert([{ trip_name: activeTrip.value, location: form.location, time: form.time, date: form.date, icon: form.icon, is_hotel: form.is_hotel, is_transport: form.is_transport, transport_no: form.transport_no, end_location: form.end_location, arrival_time: form.arrival_time }]);
+                        payload = { 
+                            trip_name: activeTrip.value, location: form.location, time: form.time, date: form.date, icon: form.icon, 
+                            is_hotel: form.is_hotel, is_transport: form.is_transport, transport_no: form.transport_no, 
+                            end_location: form.end_location, arrival_time: form.arrival_time 
+                        };
+                        const { error } = await _supabase.from('trips').insert([payload]);
+                        if (error) { alert("儲存行程失敗: " + error.message); return; }
                     } else {
-                        await _supabase.from('wishlist').insert([{ trip_name: activeTrip.value, item_name: form.item_name, owner: form.owner, category: form.category }]);
+                        payload = { trip_name: activeTrip.value, item_name: form.item_name, owner: form.owner, category: form.category };
+                        const { error } = await _supabase.from('wishlist').insert([payload]);
+                        if (error) { alert("儲存清單失敗: " + error.message); return; }
                     }
                     await fetchData(); showModal.value = false;
                     Object.assign(form, { location: '', end_location: '', transport_no: '', item_name: '', is_hotel: false, is_transport: false });
@@ -204,16 +224,17 @@
                     currentSpliitoLink: computed(() => TRIP_CONFIG[activeTrip.value]?.spliito || '#'),
                     enterTrip: (id) => { activeTrip.value = id; view.value = 'trip'; fetchData(); },
                     openModal: (m) => { modalMode.value = m; showModal.value = true; },
-                    addItem, deleteItem: async (id, table) => { if(confirm('刪除項目？')) { await _supabase.from(table).delete().eq('id', id); fetchData(); } },
+                    addItem, deleteItem: async (id, table) => { if(confirm('確定要刪除嗎？')) { await _supabase.from(table).delete().eq('id', id); fetchData(); } },
                     calculateDay: (dateStr) => {
                         if (!dateStr) return 1;
                         const start = new Date(TRIP_CONFIG[activeTrip.value].start);
                         const current = new Date(dateStr);
-                        return Math.floor((current - start) / (1000 * 60 * 60 * 24)) + 1;
+                        const diffTime = current - start;
+                        return Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
                     },
                     directToMap: (loc) => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`, '_blank'),
                     openTranslate: () => window.open(`https://translate.google.com/?sl=zh-TW&tl=${activeTrip.value==='Seoul'?'ko':'ja'}`, '_blank'),
-                    openGoogleMapsList: () => window.open(TRIP_CONFIG[activeTrip.value]?.map || 'https://www.google.com/maps4', '_blank')
+                    openGoogleMapsList: () => window.open(TRIP_CONFIG[activeTrip.value]?.map || 'https://maps.google.com', '_blank')
                 };
             }
         }).mount('#app');
