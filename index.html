@@ -10,41 +10,41 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         .ios-blur { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-        body { background-color: #FFFEF8; font-family: -apple-system, sans-serif; overflow-x: hidden; }
+        body { background-color: #FFFEF8; font-family: -apple-system, "Microsoft JhengHei", sans-serif; overflow-x: hidden; }
         .trip-card:active { scale: 0.98; transition: 0.2s; }
         [v-cloak] { display: none; }
         .iframe-container { height: calc(100vh - 200px); width: 100%; border: none; }
         .text-helper { color: #7A91B1; } 
-        .bg-helper { background-color: #7A91B1; }
         .bg-pink-theme { background-color: #fadadd; }
+        .day-badge { background-color: #7A91B1; color: white; padding: 2px 8px; border-radius: 8px; font-size: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
     <div id="app" v-cloak class="max-w-md mx-auto min-h-screen relative flex flex-col shadow-2xl bg-[#FFFEF8]">
         
         <div v-if="view === 'main'" class="p-8">
-            <h1 class="text-4xl font-black mb-2 mt-12 text-gray-800 leading-tight">Karina's Trip Planner🤍</h1>
+            <h1 class="text-4xl font-black mb-2 mt-12 text-gray-800">Karina's Trip Planner🤍</h1>
             <p class="text-gray-500 mb-10 italic">Spring Collection 2026</p>
             
             <div class="space-y-4">
-                <div @click="enterTrip('Seoul')" class="trip-card group relative bg-white rounded-[2rem] p-6 shadow-lg border border-pink-100 cursor-pointer transition-all">
+                <div @click="enterTrip('Seoul')" class="trip-card relative bg-white rounded-[2rem] p-6 shadow-lg border border-pink-100 cursor-pointer">
                     <div class="absolute right-[-10px] top-[-10px] text-6xl opacity-20">🇰🇷</div>
-                    <span class="text-[10px] font-bold text-white bg-[#7A91B1] px-2 py-0.5 rounded-full uppercase tracking-tighter">'26 March</span>
+                    <span class="text-[10px] font-bold text-white bg-[#7A91B1] px-2 py-0.5 rounded-full uppercase">'26 March</span>
                     <h2 class="text-2xl font-bold text-gray-800 mt-2">Seoul 7D6N</h2>
                     <p class="text-helper text-sm font-semibold mt-1">with Annette</p>
                 </div>
 
-                <div @click="enterTrip('Tokyo')" class="trip-card group relative bg-white rounded-[2rem] p-6 shadow-lg border border-pink-100 cursor-pointer transition-all">
+                <div @click="enterTrip('Tokyo')" class="trip-card relative bg-white rounded-[2rem] p-6 shadow-lg border border-pink-100 cursor-pointer">
                     <div class="absolute right-[-10px] top-[-10px] text-6xl opacity-20">🇯🇵</div>
-                    <span class="text-[10px] font-bold text-white bg-[#7A91B1] px-2 py-0.5 rounded-full uppercase tracking-tighter">'26 March</span>
+                    <span class="text-[10px] font-bold text-white bg-[#7A91B1] px-2 py-0.5 rounded-full uppercase">'26 March</span>
                     <h2 class="text-2xl font-bold text-gray-800 mt-2">Tokyo 5D4N</h2>
                     <p class="text-helper text-sm font-semibold mt-1">with Cherry</p>
                 </div>
 
-                <div @click="enterTrip('JapanNorthEast')" class="trip-card group relative bg-white rounded-[2rem] p-6 shadow-lg border border-pink-100 cursor-pointer transition-all">
+                <div @click="enterTrip('JapanNorthEast')" class="trip-card relative bg-white rounded-[2rem] p-6 shadow-lg border border-pink-100 cursor-pointer">
                     <div class="absolute right-[-10px] top-[-10px] text-6xl opacity-20">🇯🇵</div>
-                    <span class="text-[10px] font-bold text-white bg-[#7A91B1] px-2 py-0.5 rounded-full uppercase tracking-tighter">'26 March</span>
-                    <h2 class="text-2xl font-bold text-gray-800 mt-2">Aomori Sendai 5D4N</h2>
+                    <span class="text-[10px] font-bold text-white bg-[#7A91B1] px-2 py-0.5 rounded-full uppercase">'26 三月</span>
+                    <h2 class="text-2xl font-bold text-gray-800 mt-2">青森仙台 5天4夜</h2>
                     <p class="text-helper text-sm font-semibold mt-1">with Dad</p>
                 </div>
             </div>
@@ -54,8 +54,8 @@
             <div class="sticky top-0 z-20 bg-pink-theme ios-blur p-4 flex items-center justify-between border-b border-white/20 shadow-sm">
                 <button @click="view = 'main'" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/50 text-gray-700 shadow-sm"><i class="fas fa-home"></i></button>
                 <div class="text-center">
-                    <p class="text-[9px] font-bold text-[#7A91B1] uppercase tracking-widest">'26 March</p>
-                    <h2 class="font-bold text-lg text-gray-800 leading-none">{{ activeTripIcon }} {{ activeTripSimpleName }}</h2>
+                    <p class="text-[9px] font-bold text-[#7A91B1] uppercase tracking-widest">{{ isChinese ? "'26 三月" : "'26 March" }}</p>
+                    <h2 class="font-bold text-lg text-gray-800">{{ activeTripIcon }} {{ activeTripNameLocalized }}</h2>
                 </div>
                 <div class="flex gap-2">
                     <button @click="openTranslate" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/50 text-gray-700 shadow-sm"><i class="fas fa-language"></i></button>
@@ -64,72 +64,67 @@
             </div>
 
             <div class="flex p-1.5 bg-pink-theme rounded-2xl m-4 shadow-inner">
-                <button @click="currentTab = 'schedule'" :class="currentTab === 'schedule' ? 'bg-white shadow text-gray-800' : 'text-gray-500'" class="flex-1 py-2 rounded-xl text-lg transition-all">
-                    📍 <span class="text-[9px] font-bold block uppercase">Schedule</span>
-                </button>
-                <button @click="currentTab = 'wishlist'" :class="currentTab === 'wishlist' ? 'bg-white shadow text-gray-800' : 'text-gray-500'" class="flex-1 py-2 rounded-xl text-lg transition-all">
-                    ✨ <span class="text-[9px] font-bold block uppercase">Wishlist</span>
-                </button>
-                <button @click="currentTab = 'split'" :class="currentTab === 'split' ? 'bg-white shadow text-gray-800' : 'text-gray-500'" class="flex-1 py-2 rounded-xl text-lg transition-all">
-                    💰 <span class="text-[9px] font-bold block uppercase">Split</span>
+                <button v-for="tab in tabs" @click="currentTab = tab.id" :class="currentTab === tab.id ? 'bg-white shadow text-gray-800' : 'text-gray-500'" class="flex-1 py-2 rounded-xl text-lg transition-all text-center">
+                    {{ tab.icon }} <span class="text-[10px] font-bold block uppercase">{{ isChinese ? tab.cn : tab.en }}</span>
                 </button>
             </div>
 
-            <div v-if="currentTab === 'schedule'" class="px-4 space-y-4 pb-32">
-                <div v-for="item in currentSchedule" :key="item.id" class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex gap-4">
-                    <div class="flex flex-col items-center min-w-[50px]">
-                        <span class="text-[10px] font-black text-white bg-[#7A91B1] px-2 py-1 rounded-lg uppercase">{{ item.time }}</span>
+            <div v-if="currentTab === 'schedule'" class="px-4 pb-32">
+                <div v-if="activeHotel" class="mb-4 bg-white/80 p-4 rounded-3xl border border-pink-200 flex items-center gap-3 shadow-sm">
+                    <div class="text-2xl">🏨</div>
+                    <div>
+                        <p class="text-[10px] font-bold text-[#7A91B1] uppercase">{{ isChinese ? '今日入住飯店' : 'Tonight\'s Stay' }}</p>
+                        <p class="font-bold text-gray-800">{{ activeHotel }}</p>
                     </div>
-                    <div class="flex-grow">
-                        <h4 class="font-bold text-gray-800">{{ item.location }}</h4>
-                        <div class="flex gap-4 mt-3">
-                            <a :href="'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(item.location)" target="_blank" class="text-[10px] text-helper font-bold uppercase tracking-widest">Guide</a>
-                            <button @click="deleteItem(item.id, 'trips')" class="text-[10px] text-red-300 font-bold uppercase">Delete</button>
+                </div>
+
+                <div class="space-y-4">
+                    <div v-for="item in currentSchedule" :key="item.id" class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex gap-4">
+                        <div class="flex flex-col items-center min-w-[50px]">
+                            <span class="day-badge mb-1">{{ item.day || 'Day 1' }}</span>
+                            <span class="text-[10px] font-black text-[#7A91B1]">{{ item.time }}</span>
+                        </div>
+                        <div class="flex-grow">
+                            <div class="flex items-center gap-2">
+                                <span class="text-lg">{{ item.icon || '📍' }}</span>
+                                <h4 class="font-bold text-gray-800">{{ item.location }}</h4>
+                            </div>
+                            <div class="flex gap-4 mt-3">
+                                <a :href="'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(item.location)" target="_blank" class="text-[10px] text-helper font-bold uppercase tracking-widest">{{ isChinese ? '導航' : 'Guide' }}</a>
+                                <button @click="deleteItem(item.id, 'trips')" class="text-[10px] text-red-300 font-bold uppercase">{{ isChinese ? '刪除' : 'Delete' }}</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <button @click="openModal('schedule')" class="w-full py-5 bg-white border-2 border-dashed border-pink-200 rounded-3xl text-gray-400 font-bold">
-                    <i class="fas fa-plus-circle mr-2"></i>Add Plan
-                </button>
-            </div>
-
-            <div v-if="currentTab === 'wishlist'" class="px-4 space-y-4 pb-32">
-                <div v-for="item in currentWishlist" :key="item.id" class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex items-center justify-between">
-                    <div>
-                        <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[#7A91B1]/10 text-[#7A91B1] uppercase mr-2">{{ item.category }}</span>
-                        <span class="font-bold text-gray-800">{{ item.item_name }}</span>
-                    </div>
-                    <button @click="deleteItem(item.id, 'wishlist')" class="text-gray-300 hover:text-red-300 transition-colors">
-                        <i class="fas fa-times-circle"></i>
+                    <button @click="openModal('schedule')" class="w-full py-5 bg-white border-2 border-dashed border-pink-200 rounded-3xl text-gray-400 font-bold">
+                        <i class="fas fa-plus-circle mr-2"></i>{{ isChinese ? '新增計畫' : 'Add Plan' }}
                     </button>
                 </div>
-                <button @click="openModal('wishlist')" class="w-full py-5 bg-white/50 border-2 border-dashed border-pink-200 rounded-3xl text-gray-400 font-bold">
-                    <i class="fas fa-magic mr-2"></i>Add to Wishlist
-                </button>
             </div>
-
-            <div v-if="currentTab === 'split'" class="flex-grow">
-                <iframe :src="currentSpliitoLink" class="iframe-container" allow="payment"></iframe>
+            
             </div>
-        </div>
 
         <div v-if="showModal" class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm" @click.self="showModal = false">
-            <div class="bg-[#FFFEF8] w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-pink-100">
-                <h3 class="text-xl font-bold mb-6 text-gray-800 text-center">{{ modalMode === 'schedule' ? 'New Plan' : 'Wishlist Item' }}</h3>
-                <div v-if="modalMode === 'schedule'" class="space-y-4">
-                    <input v-model="form.time" type="time" class="w-full bg-white p-4 rounded-2xl border-none shadow-sm">
-                    <input v-model="form.location" type="text" placeholder="Where to go?" class="w-full bg-white p-4 rounded-2xl border-none shadow-sm">
-                </div>
-                <div v-else class="space-y-4">
-                    <div class="flex gap-2 p-1 bg-white rounded-2xl shadow-sm">
-                        <button @click="form.category = 'Eat'" :class="form.category === 'Eat' ? 'bg-[#7A91B1] text-white' : 'text-gray-400'" class="flex-1 py-2 rounded-xl text-[10px] font-bold transition-all uppercase">Must Eat 🍜</button>
-                        <button @click="form.category = 'Buy'" :class="form.category === 'Buy' ? 'bg-[#7A91B1] text-white' : 'text-gray-400'" class="flex-1 py-2 rounded-xl text-[10px] font-bold transition-all uppercase">Must Buy 🛍️</button>
+            <div class="bg-[#FFFEF8] w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-pink-100 overflow-y-auto max-h-[90vh]">
+                <h3 class="text-xl font-bold mb-6 text-gray-800 text-center">{{ isChinese ? '新增計畫' : 'New Plan' }}</h3>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input v-model="form.day" type="text" placeholder="Day 1" class="bg-white p-4 rounded-2xl border-none shadow-sm text-sm">
+                        <input v-model="form.time" type="time" class="bg-white p-4 rounded-2xl border-none shadow-sm text-sm">
                     </div>
-                    <input v-model="form.itemName" type="text" placeholder="What's on your mind?" class="w-full bg-white p-4 rounded-2xl border-none shadow-sm">
+                    
+                    <div class="flex justify-between p-2 bg-white rounded-2xl shadow-sm">
+                        <button v-for="ico in icons" @click="form.icon = ico" :class="form.icon === ico ? 'bg-pink-100 scale-110' : ''" class="w-10 h-10 rounded-xl text-xl transition-all">{{ ico }}</button>
+                    </div>
+
+                    <input v-model="form.location" type="text" :placeholder="isChinese ? '地點名稱' : 'Location name'" class="w-full bg-white p-4 rounded-2xl border-none shadow-sm text-sm">
+                    
+                    <label class="flex items-center gap-2 p-2 text-sm text-gray-600">
+                        <input type="checkbox" v-model="form.isHotel"> {{ isChinese ? '標記為今晚飯店' : 'Mark as tonight\'s hotel' }}
+                    </label>
                 </div>
                 <div class="flex gap-4 mt-8">
-                    <button @click="showModal = false" class="flex-1 py-4 text-gray-400 font-bold">Cancel</button>
-                    <button @click="addItem" class="flex-[2] py-4 bg-[#7A91B1] text-white rounded-2xl font-bold shadow-lg">Confirm</button>
+                    <button @click="showModal = false" class="flex-1 py-4 text-gray-400 font-bold">{{ isChinese ? '取消' : 'Cancel' }}</button>
+                    <button @click="addItem" class="flex-[2] py-4 bg-[#7A91B1] text-white rounded-2xl font-bold shadow-lg">{{ isChinese ? '確定' : 'Confirm' }}</button>
                 </div>
             </div>
         </div>
@@ -147,67 +142,52 @@
                 const currentTab = ref('schedule');
                 const activeTrip = ref('');
                 const showModal = ref(false);
-                const modalMode = ref('schedule');
-                const form = reactive({ time: '', location: '', category: 'Eat', itemName: '' });
+                const isChinese = computed(() => activeTrip.value === 'JapanNorthEast');
+                const form = reactive({ time: '', location: '', day: '', icon: '📍', isHotel: false });
                 const tripsData = reactive({ 'Seoul': [], 'Tokyo': [], 'JapanNorthEast': [] });
-                const wishlists = reactive({ 'Seoul': [], 'Tokyo': [], 'JapanNorthEast': [] });
 
-                const TRIP_CONFIG = {
-                    'Seoul': { icon: '🇰🇷', name: 'Seoul', split: 'https://spliito.com/group/01KDZPAG11CXR5SH9XEHCZ3DVX' },
-                    'Tokyo': { icon: '🇯🇵', name: 'Tokyo', split: 'https://spliito.com/group/01KE036WEZZKSFRFVG33KNQEB8', map: 'https://www.google.com/maps' },
-                    'JapanNorthEast': { icon: '🇯🇵', name: 'Aomori', split: 'https://spliito.com' }
+                const tabs = [
+                    { id: 'schedule', icon: '📍', en: 'Schedule', cn: '行程表' },
+                    { id: 'wishlist', icon: '✨', en: 'Wishlist', cn: '清單' },
+                    { id: 'split', icon: '💰', en: 'Split', cn: '結帳' }
+                ];
+                const icons = ['🍽️', '☕', '🛍️', '⛩️', '🏨', '📷'];
+
+                const fetchTrips = async () => {
+                    const { data } = await _supabase.from('trips').select('*').order('day', { ascending: true }).order('time', { ascending: true });
+                    if (data) ['Seoul', 'Tokyo', 'JapanNorthEast'].forEach(t => tripsData[t] = data.filter(i => i.trip_name === t));
                 };
 
-                const fetchAllData = async () => {
-                    const res1 = await _supabase.from('trips').select('*').order('time', { ascending: true });
-                    if (res1.data) {
-                        ['Seoul', 'Tokyo', 'JapanNorthEast'].forEach(t => { tripsData[t] = res1.data.filter(i => i.trip_name === t); });
-                    }
-                    const res2 = await _supabase.from('wishlist').select('*').order('created_at', { ascending: false });
-                    if (res2.data) {
-                        ['Seoul', 'Tokyo', 'JapanNorthEast'].forEach(t => { wishlists[t] = res2.data.filter(i => i.trip_name === t); });
-                    }
-                };
+                const activeTripNameLocalized = computed(() => activeTrip.value === 'JapanNorthEast' ? '青森仙台' : activeTrip.value);
+                const activeTripIcon = computed(() => activeTrip.value === 'Seoul' ? '🇰🇷' : '🇯🇵');
 
-                const enterTrip = (id) => { activeTrip.value = id; view.value = 'trip'; fetchAllData(); };
-                const openModal = (mode) => { modalMode.value = mode; showModal.value = true; };
+                const activeHotel = computed(() => {
+                    const hotel = tripsData[activeTrip.value]?.find(i => i.is_hotel);
+                    return hotel ? hotel.location : null;
+                });
+
+                const enterTrip = (id) => { activeTrip.value = id; view.value = 'trip'; fetchTrips(); };
+                const openModal = (m) => { showModal.value = true; };
                 const addItem = async () => {
-                    if (modalMode.value === 'schedule' && form.location && form.time) {
-                        await _supabase.from('trips').insert([{ trip_name: activeTrip.value, location: form.location, time: form.time }]);
-                    } else if (modalMode.value === 'wishlist' && form.itemName) {
-                        await _supabase.from('wishlist').insert([{ trip_name: activeTrip.value, item_name: form.itemName, category: form.category }]);
-                    }
-                    await fetchAllData(); form.location = ''; form.time = ''; form.itemName = ''; showModal.value = false;
+                    await _supabase.from('trips').insert([{ trip_name: activeTrip.value, location: form.location, time: form.time, day: form.day, icon: form.icon, is_hotel: form.isHotel }]);
+                    await fetchTrips(); showModal.value = false;
+                    form.location = ''; form.time = ''; form.isHotel = false;
                 };
-                const deleteItem = async (id, table) => {
-                    if (confirm('Delete this?')) { await _supabase.from(table).delete().eq('id', id); await fetchAllData(); }
-                };
-
-                const activeTripIcon = computed(() => TRIP_CONFIG[activeTrip.value]?.icon || '');
-                const activeTripSimpleName = computed(() => TRIP_CONFIG[activeTrip.value]?.name || '');
-                const currentSchedule = computed(() => tripsData[activeTrip.value] || []);
-                const currentWishlist = computed(() => wishlists[activeTrip.value] || []);
-                const currentSpliitoLink = computed(() => TRIP_CONFIG[activeTrip.value]?.split || 'https://spliito.com');
-
-                const openTranslate = () => {
-                    const lang = activeTrip.value === 'Seoul' ? 'ko' : 'ja';
-                    window.open(`https://translate.google.com/?sl=zh-TW&tl=${lang}`, '_blank');
-                };
-                const openGoogleMapsList = () => {
-                    const mapUrl = TRIP_CONFIG[activeTrip.value]?.map || 'https://www.google.com/maps';
-                    window.open(mapUrl, '_blank');
-                };
+                const deleteItem = async (id, table) => { if (confirm('Delete?')) { await _supabase.from(table).delete().eq('id', id); fetchTrips(); } };
+                
+                const openTranslate = () => window.open(`https://translate.google.com/?sl=zh-TW&tl=${activeTrip.value==='Seoul'?'ko':'ja'}`, '_blank');
+                const openGoogleMapsList = () => window.open('https://www.google.com/maps', '_blank');
 
                 onMounted(() => {
                     const params = new URLSearchParams(window.location.search);
                     const tripParam = params.get('trip');
-                    if (tripParam && TRIP_CONFIG[tripParam]) enterTrip(tripParam);
+                    if (tripParam) enterTrip(tripParam);
+                    fetchTrips();
                 });
 
-                return { 
-                    view, currentTab, activeTrip, activeTripIcon, activeTripSimpleName, modalMode,
-                    currentSchedule, currentWishlist, currentSpliitoLink, showModal, form, 
-                    enterTrip, openModal, addItem, deleteItem, openTranslate, openGoogleMapsList 
+                return { view, currentTab, activeTrip, activeTripIcon, tabs, icons, isChinese, activeHotel, activeTripNameLocalized,
+                    currentSchedule: computed(() => tripsData[activeTrip.value] || []),
+                    showModal, form, enterTrip, openModal, addItem, deleteItem, openTranslate, openGoogleMapsList 
                 };
             }
         }).mount('#app');
