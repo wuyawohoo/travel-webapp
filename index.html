@@ -10,7 +10,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         .ios-blur { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-        body { background-color: #FFFDD0; font-family: -apple-system, sans-serif; overflow-x: hidden; }
+        body { background-color: #FFFEF8; font-family: -apple-system, sans-serif; overflow-x: hidden; }
         .trip-card:active { scale: 0.98; transition: 0.2s; }
         [v-cloak] { display: none; }
         .iframe-container { height: calc(100vh - 200px); width: 100%; border: none; }
@@ -20,7 +20,7 @@
     </style>
 </head>
 <body>
-    <div id="app" v-cloak class="max-w-md mx-auto min-h-screen relative flex flex-col shadow-2xl bg-[#FFFDD0]">
+    <div id="app" v-cloak class="max-w-md mx-auto min-h-screen relative flex flex-col shadow-2xl bg-[#FFFEF8]">
         
         <div v-if="view === 'main'" class="p-8">
             <h1 class="text-4xl font-black mb-2 mt-12 text-gray-800 leading-tight">Karina's Trip Planner🤍</h1>
@@ -114,7 +114,7 @@
         </div>
 
         <div v-if="showModal" class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm" @click.self="showModal = false">
-            <div class="bg-[#FFFDD0] w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-pink-100">
+            <div class="bg-[#FFFEF8] w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-pink-100">
                 <h3 class="text-xl font-bold mb-6 text-gray-800 text-center">{{ modalMode === 'schedule' ? 'New Plan' : 'Wishlist Item' }}</h3>
                 <div v-if="modalMode === 'schedule'" class="space-y-4">
                     <input v-model="form.time" type="time" class="w-full bg-white p-4 rounded-2xl border-none shadow-sm">
