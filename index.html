@@ -3,108 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Trip Planner</title>
+    <title>Karina's Trip Planner🤍</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         .ios-blur { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-        body { background-color: #f2f2f7; font-family: -apple-system, sans-serif; }
-        .tab-shadow { box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.08); }
+        body { background-color: #f2f2f7; font-family: -apple-system, sans-serif; overflow-x: hidden; }
+        .trip-card:active { scale: 0.98; transition: 0.2s; }
     </style>
 </head>
 <body>
-    <div id="app" class="max-w-md mx-auto min-h-screen relative flex flex-col">
+    <div id="app" class="max-w-md mx-auto min-h-screen relative flex flex-col shadow-2xl bg-[#f2f2f7]">
         
         <div v-if="view === 'main'" class="p-8">
             <h1 class="text-4xl font-black mb-2 mt-12 text-gray-800">Karina's Trip Planner🤍</h1>
+            <p class="text-gray-400 mb-10">Select a trip to start planning.</p>
             
             <div class="space-y-4">
-                <div @click="enterTrip('Seoul')" class="group relative bg-white rounded-[2rem] p-6 shadow-xl border border-blue-50 cursor-pointer overflow-hidden transition-all active:scale-95">
+                <div @click="enterTrip('Seoul')" class="trip-card group relative bg-white rounded-[2rem] p-6 shadow-xl border border-blue-50 cursor-pointer overflow-hidden transition-all">
                     <div class="absolute right-[-20px] top-[-20px] text-blue-50 text-8xl font-bold opacity-20">KR</div>
                     <h2 class="text-2xl font-bold text-gray-800">🇰🇷 '26 Mar Seoul 7D6N</h2>
                     <p class="text-blue-500 text-sm font-medium mt-1">with Annette</p>
                 </div>
 
-                <div @click="enterTrip('Tokyo')" class="group relative bg-white rounded-[2rem] p-6 shadow-xl border border-indigo-50 cursor-pointer overflow-hidden transition-all active:scale-95">
+                <div @click="enterTrip('Tokyo')" class="trip-card group relative bg-white rounded-[2rem] p-6 shadow-xl border border-indigo-50 cursor-pointer overflow-hidden transition-all">
                     <div class="absolute right-[-20px] top-[-20px] text-indigo-50 text-8xl font-bold opacity-20">JP</div>
                     <h2 class="text-2xl font-bold text-gray-800">🇯🇵 '26 Mar Tokyo 5D4N</h2>
                     <p class="text-indigo-600 text-sm font-medium mt-1">with Cherry</p>
                 </div>
-                
-                <div @click="enterTrip('JapanNorthEast')" class="group relative bg-white rounded-[2rem] p-6 shadow-xl border border-indigo-50 cursor-pointer overflow-hidden transition-all active:scale-95">
-                    <div class="absolute right-[-20px] top-[-20px] text-indigo-50 text-8xl font-bold opacity-20">JP</div>
-                    <h2 class="text-2xl font-bold text-gray-800">🇯🇵 '26 Mar 青森仙台盛岡 5D4N</h2>
-                    <p class="text-indigo-600 text-sm font-medium mt-1">with Dad</p>
+
+                <div @click="enterTrip('JapanNorthEast')" class="trip-card group relative bg-white rounded-[2rem] p-6 shadow-xl border border-emerald-50 cursor-pointer overflow-hidden transition-all">
+                    <div class="absolute right-[-20px] top-[-20px] text-emerald-50 text-8xl font-bold opacity-20">JP</div>
+                    <h2 class="text-2xl font-bold text-gray-800">🇯🇵 '26 Mar 東北 5D4N</h2>
+                    <p class="text-emerald-600 text-sm font-medium mt-1">with Dad</p>
                 </div>
             </div>
         </div>
 
-        <div v-if="view === 'trip'" class="flex-grow pb-24">
+        <div v-if="view === 'trip'" class="flex-grow pb-32">
             <div class="sticky top-0 z-20 bg-white/80 ios-blur p-4 flex items-center justify-between border-b">
                 <button @click="view = 'main'" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100"><i class="fas fa-home text-gray-600"></i></button>
                 <h2 class="font-bold text-lg text-gray-800">{{ activeTripName }}</h2>
                 <button @click="openGoogleMapsList" class="w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 text-blue-600"><i class="fas fa-map-marked-alt"></i></button>
             </div>
 
-            <div class="flex p-1.5 bg-gray-200/50 rounded-2xl m-4 backdrop-blur">
-                <button @click="currentTab = 'schedule'" :class="currentTab === 'schedule' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500'" class="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all">行程行程</button>
-                <button @click="currentTab = 'split'" :class="currentTab === 'split' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500'" class="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all">分帳記帳</button>
+            <div class="flex p-1.5 bg-gray-200/50 rounded-2xl m-4">
+                <button @click="currentTab = 'schedule'" :class="currentTab === 'schedule' ? 'bg-white shadow text-blue-600' : 'text-gray-500'" class="flex-1 py-2 rounded-xl text-sm font-bold transition-all">行程表</button>
+                <button @click="currentTab = 'split'" :class="currentTab === 'split' ? 'bg-white shadow text-blue-600' : 'text-gray-500'" class="flex-1 py-2 rounded-xl text-sm font-bold transition-all">分帳 (Spliito)</button>
             </div>
 
-            <div v-show="currentTab === 'schedule'" class="px-4 space-y-4">
-                <div v-for="(item, index) in currentSchedule" :key="index" class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex gap-4">
-                    <div class="flex flex-col items-center justify-start py-1">
-                        <span class="text-xs font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">{{ item.time }}</span>
-                        <div class="w-0.5 h-full bg-blue-100 my-2"></div>
+            <div v-if="currentTab === 'schedule'" class="px-4 space-y-4">
+                <div v-for="(item, index) in currentSchedule" :key="item.id" class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex gap-4">
+                    <div class="flex flex-col items-center min-w-[50px]">
+                        <span class="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-lg uppercase tracking-tighter">{{ item.time }}</span>
                     </div>
                     <div class="flex-grow">
-                        <h4 class="font-bold text-gray-800 text-lg">{{ item.location }}</h4>
-                        <p class="text-sm text-gray-400 mt-1">{{ item.note }}</p>
-                        <div class="flex gap-2 mt-3">
-                            <a :href="'https://www.google.com/maps/search/?api=1&query=' + item.location" target="_blank" class="text-xs bg-gray-50 text-gray-600 px-3 py-1.5 rounded-full border">導航</a>
-                            <button @click="deleteItem(index)" class="text-xs text-red-400 px-3 py-1.5 ml-auto">刪除</button>
+                        <h4 class="font-bold text-gray-800">{{ item.location }}</h4>
+                        <p class="text-xs text-gray-400 mt-1">{{ item.note }}</p>
+                        <div class="flex gap-4 mt-3">
+                            <a :href="'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(item.location)" target="_blank" class="text-[10px] text-blue-500 font-bold tracking-widest uppercase">導航</a>
+                            <button @click="deleteItem(item.id)" class="text-[10px] text-red-300 font-bold uppercase">刪除</button>
                         </div>
                     </div>
                 </div>
-                
-                <button @click="showModal = true" class="w-full py-5 bg-white border-2 border-dashed border-gray-200 rounded-3xl text-gray-400 font-bold hover:bg-gray-50 transition">
-                    <i class="fas fa-plus-circle mr-2"></i>新增行程目的地
+                <button @click="showModal = true" class="w-full py-5 bg-white border-2 border-dashed border-gray-200 rounded-3xl text-gray-400 font-bold">
+                    <i class="fas fa-plus-circle mr-2"></i>新增行程
                 </button>
             </div>
 
-            <div v-show="currentTab === 'split'" class="px-4">
-                <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-[2.5rem] p-8 text-white shadow-2xl mb-6">
-                    <p class="text-gray-400 text-sm">連動外部 App</p>
-                    <h3 class="text-2xl font-bold mt-1">Spliito 快速記帳</h3>
-                    <a href="https://spliito.com" target="_blank" class="mt-6 inline-block bg-white text-gray-900 px-8 py-3 rounded-2xl font-black text-sm tracking-wide transition-transform active:scale-95">點擊開啟</a>
-                </div>
-                <div class="bg-white rounded-3xl p-6 shadow-sm border">
-                    <h4 class="font-bold text-gray-800 mb-4">使用說明</h4>
-                    <p class="text-sm text-gray-500 leading-relaxed">請將 Spliito 群組連結貼給朋友，這裡主要作為行程整合使用。未來可串接 API 自動顯示餘額。</p>
+            <div v-if="currentTab === 'split'" class="px-4">
+                <div class="bg-gray-900 rounded-[2.5rem] p-8 text-white shadow-2xl text-center">
+                    <h3 class="text-2xl font-bold">Spliito 快速記帳</h3>
+                    <p class="text-gray-400 text-sm mt-2 mb-6 tracking-wide">與夥伴記錄每一筆開支</p>
+                    <a href="https://spliito.com" target="_blank" class="bg-white text-gray-900 px-10 py-3 rounded-2xl font-black text-sm inline-block">立即開啟</a>
                 </div>
             </div>
         </div>
 
-        <nav v-if="view === 'trip'" class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[320px] bg-gray-900/90 ios-blur rounded-full px-8 py-4 shadow-2xl z-50 flex justify-between items-center border border-white/10">
-            <button @click="openTranslate" class="text-white flex items-center gap-2">
-                <i class="fas fa-language text-xl text-blue-400"></i>
-                <span class="text-sm font-bold">開啟 Google 翻譯</span>
-            </button>
-            <div class="w-px h-4 bg-gray-700"></div>
-            <button @click="currentTab = 'schedule'" class="text-white">
-                <i class="fas fa-map-pin text-lg"></i>
+        <nav v-if="view === 'trip'" class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[80%] bg-gray-900/90 ios-blur rounded-full px-8 py-4 shadow-2xl z-50 border border-white/10 flex justify-center">
+            <button @click="openTranslate" class="text-white flex items-center gap-3">
+                <i class="fas fa-language text-blue-400 text-xl"></i>
+                <span class="text-sm font-bold tracking-widest uppercase">Google 翻譯</span>
             </button>
         </nav>
 
         <div v-if="showModal" class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="showModal = false">
-            <div class="bg-white w-full max-w-sm rounded-[2rem] p-8 shadow-2xl">
+            <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl transform transition-all">
                 <h3 class="text-xl font-bold mb-6 text-gray-800">在哪裡碰面？</h3>
-                <input v-model="form.time" type="time" class="w-full bg-gray-100 p-4 rounded-2xl mb-4 border-none focus:ring-2 focus:ring-blue-500">
-                <input v-model="form.location" type="text" placeholder="目的地名稱" class="w-full bg-gray-100 p-4 rounded-2xl mb-6 border-none focus:ring-2 focus:ring-blue-500">
-                <div class="flex gap-3">
-                    <button @click="showModal = false" class="flex-1 py-4 text-gray-500 font-bold">取消</button>
+                <div class="space-y-4">
+                    <div class="bg-gray-100 rounded-2xl p-4 flex items-center">
+                        <i class="far fa-clock text-gray-400 mr-3"></i>
+                        <input v-model="form.time" type="time" class="bg-transparent w-full outline-none text-gray-700">
+                    </div>
+                    <div class="bg-gray-100 rounded-2xl p-4 flex items-center">
+                        <i class="fas fa-map-marker-alt text-gray-400 mr-3"></i>
+                        <input v-model="form.location" type="text" placeholder="目的地名稱" class="bg-transparent w-full outline-none text-gray-700">
+                    </div>
+                </div>
+                <div class="flex gap-4 mt-8">
+                    <button @click="showModal = false" class="flex-1 py-4 text-gray-400 font-bold">取消</button>
                     <button @click="addItem" class="flex-[2] py-4 bg-blue-600 text-white rounded-2xl font-bold shadow-lg shadow-blue-200">確認加入</button>
                 </div>
             </div>
@@ -112,118 +111,95 @@
 
     </div>
 
-<script>
-    const supabaseUrl = 'https://wutwyafokyebqzhfdrct.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1dHd5YWZva3llYnF6aGZkcmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgzNDMyNjYsImV4cCI6MjA4MzkxOTI2Nn0.2qvKu3Wwee7zT1vp0G3pMOhRHuObJSuK8Sy9qWdNxJ4'; 
-    // ----------------------------------
+    <script>
+        const { createApp, ref, reactive, computed, onMounted } = Vue;
 
-    const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
-    const { createApp, ref, reactive, computed, onMounted } = Vue;
+        // --- ！！！金鑰已自動填入！！！ ---
+        const supabaseUrl = 'https://wutwyafokyebqzhfdrct.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1dHd5YWZva3llYnF6aGZkcmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgzNDMyNjYsImV4cCI6MjA4MzkxOTI2Nn0.2qvKu3Wwee7zT1vp0G3pMOhRHuObJSuK8Sy9qWdNxJ4';
+        // ------------------------------------------
 
-    createApp({
-        setup() {
-            const view = ref('main');
-            const currentTab = ref('schedule');
-            const activeTrip = ref('');
-            const showModal = ref(false);
-            const form = reactive({ time: '', location: '', note: '' });
-            
-            // 旅程設定檔：方便管理名稱與內容
-            const TRIP_CONFIG = {
-                'Seoul': '🇰🇷 '26 Mar Seoul 7D6N',
-                'Tokyo': '🇯🇵 '26 Mar Tokyo 5D4N',
-                'JapanNorthEast': '🇯🇵 '26 Mar 青森仙台盛岡 5D4N'
-            };
+        const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-            // 資料存放區
-            const tripsData = reactive({ 
-                'Seoul': [], 
-                'Tokyo': [], 
-                'JapanNorthEast': [] 
-            });
+        createApp({
+            setup() {
+                const view = ref('main');
+                const currentTab = ref('schedule');
+                const activeTrip = ref('');
+                const showModal = ref(false); 
+                const form = reactive({ time: '', location: '', note: '' });
+                const tripsData = reactive({ 'Seoul': [], 'Tokyo': [], 'JapanNorthEast': [] });
 
-            // 從資料庫抓取資料
-            const fetchTrips = async () => {
-                const { data, error } = await _supabase
-                    .from('trips')
-                    .select('*')
-                    .order('time', { ascending: true });
-                if (data) {
-                    // 分類存入reactive物件
-                    tripsData.Seoul = data.filter(i => i.trip_name === 'Seoul');
-                    tripsData.Tokyo = data.filter(i => i.trip_name === 'Tokyo');
-                    tripsData.JapanNorthEast = data.filter(i => i.trip_name === 'JapanNorthEast');
-                }
-            };
+                const TRIP_CONFIG = {
+                    'Seoul': '🇰🇷 \'26 Mar Seoul 7D6N',
+                    'Tokyo': '🇯🇵 \'26 Mar Tokyo 5D4N',
+                    'JapanNorthEast': '🇯🇵 \'26 Mar 青森仙台盛岡 5D4N'
+                };
 
-            const enterTrip = (id) => {
-                activeTrip.value = id;
-                view.value = 'trip';
-                fetchTrips();
-            };
-
-            const activeTripName = computed(() => TRIP_CONFIG[activeTrip.value] || '旅程詳情');
-            const currentSchedule = computed(() => tripsData[activeTrip.value] || []);
-
-            // 新增行程到雲端
-            const addItem = async () => {
-                if (form.location && form.time) {
-                    const { error } = await _supabase.from('trips').insert([
-                        { 
-                            trip_name: activeTrip.value, 
-                            location: form.location, 
-                            time: form.time,
-                            note: form.note 
-                        }
-                    ]);
-                    if (!error) {
-                        await fetchTrips();
-                        form.location = ''; form.time = '';
-                        showModal.value = false;
-                    } else {
-                        alert('儲存失敗：' + error.message);
+                const fetchTrips = async () => {
+                    const { data } = await _supabase.from('trips').select('*').order('time', { ascending: true });
+                    if (data) {
+                        tripsData.Seoul = data.filter(i => i.trip_name === 'Seoul');
+                        tripsData.Tokyo = data.filter(i => i.trip_name === 'Tokyo');
+                        tripsData.JapanNorthEast = data.filter(i => i.trip_name === 'JapanNorthEast');
                     }
-                }
-            };
+                };
 
-            // 從雲端刪除行程
-            const deleteItem = async (index) => {
-                const itemToDelete = currentSchedule.value[index];
-                if (confirm(`確定要刪除「${itemToDelete.location}」嗎？`)) {
-                    const { error } = await _supabase.from('trips').delete().eq('id', itemToDelete.id);
-                    if (!error) await fetchTrips();
-                }
-            };
-// 翻譯與地圖功能
-            const openTranslate = () => {
-                const lang = activeTrip.value === 'Seoul' ? 'ko' : 'ja';
-                window.open(`https://translate.google.com/?sl=zh-TW&tl=${lang}&op=translate`, '_blank');
-            };
+                const enterTrip = (id) => {
+                    activeTrip.value = id;
+                    view.value = 'trip';
+                    fetchTrips();
+                };
 
-            const openGoogleMapsList = () => {
-                window.open('https://www.google.com/maps', '_blank');
-            };
+                const activeTripName = computed(() => TRIP_CONFIG[activeTrip.value] || '');
+                const currentSchedule = computed(() => tripsData[activeTrip.value] || []);
 
-            // 初始化：判斷網址參數
-            onMounted(() => {
-    const params = new URLSearchParams(window.location.search);
-    const tripParam = params.get('trip');
-    
-    // 只有在網址有正確參數時才自動進入頁面
-    if (tripParam && TRIP_CONFIG[tripParam]) {
-        enterTrip(tripParam);
-    } 
-    // 如果沒有參數，就什麼都不做，讓使用者停留在選擇畫面的 main view
-    
-    fetchTrips(); // 依然在後台抓取資料
-});
-    
-            return { 
-                view, currentTab, activeTrip, activeTripName, currentSchedule, 
-                showModal, form, enterTrip, addItem, deleteItem, openTranslate, openGoogleMapsList 
-            };
-        }
-    }).mount('#app');
-</script>
+                const addItem = async () => {
+                    if (form.location && form.time) {
+                        const { error } = await _supabase.from('trips').insert([
+                            { trip_name: activeTrip.value, location: form.location, time: form.time }
+                        ]);
+                        if (!error) {
+                            await fetchTrips();
+                            form.location = ''; form.time = '';
+                            showModal.value = false;
+                        }
+                    }
+                };
+
+                const deleteItem = async (id) => {
+                    if (confirm('確定要刪除此行程嗎？')) {
+                        const { error } = await _supabase.from('trips').delete().eq('id', id);
+                        if (!error) await fetchTrips();
+                    }
+                };
+
+                const openTranslate = () => {
+                    const lang = activeTrip.value === 'Seoul' ? 'ko' : 'ja';
+                    window.open(`https://translate.google.com/?sl=zh-TW&tl=${lang}`, '_blank');
+                };
+
+                const openGoogleMapsList = () => {
+                    window.open('https://www.google.com/maps', '_blank');
+                };
+
+                onMounted(() => {
+                    const params = new URLSearchParams(window.location.search);
+                    const tripParam = params.get('trip');
+                    if (tripParam && TRIP_CONFIG[tripParam]) {
+                        enterTrip(tripParam);
+                    } else {
+                        view.value = 'main'; 
+                    }
+                    fetchTrips();
+                });
+
+                return { 
+                    view, currentTab, activeTrip, activeTripName, currentSchedule, 
+                    showModal, form, enterTrip, addItem, deleteItem, openTranslate, openGoogleMapsList 
+                };
+            }
+        }).mount('#app');
+    </script>
 </body>
 </html>
