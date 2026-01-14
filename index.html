@@ -206,10 +206,17 @@
 
             // 初始化：判斷網址參數
             onMounted(() => {
-                const params = new URLSearchParams(window.location.search);
-                const tripParam = params.get('trip');
-                fetchTrips();
-            });
+    const params = new URLSearchParams(window.location.search);
+    const tripParam = params.get('trip');
+    
+    // 只有在網址有正確參數時才自動進入頁面
+    if (tripParam && TRIP_CONFIG[tripParam]) {
+        enterTrip(tripParam);
+    } 
+    // 如果沒有參數，就什麼都不做，讓使用者停留在選擇畫面的 main view
+    
+    fetchTrips(); // 依然在後台抓取資料
+});
     
             return { 
                 view, currentTab, activeTrip, activeTripName, currentSchedule, 
