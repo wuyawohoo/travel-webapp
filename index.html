@@ -10,142 +10,142 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         .ios-blur { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-        body { background-color: #F8FAF9; font-family: -apple-system, sans-serif; overflow-x: hidden; }
+        body { background-color: #FFFEF8; font-family: -apple-system, "Microsoft JhengHei", sans-serif; overflow-x: hidden; }
         [v-cloak] { display: none; }
         
-        /* 仿參考圖的 Day 選擇器 */
-        .day-scroller { display: flex; overflow-x: auto; gap: 12px; padding: 10px 0; scrollbar-width: none; }
-        .day-scroller::-webkit-scrollbar { display: none; }
-        .day-btn { min-width: 70px; height: 70px; border-radius: 35px; border: 2px solid #E5E7EB; display: flex; flex-direction: column; items-center; justify-content: center; transition: all 0.3s; background: white; }
-        .day-btn.active { background: #10B981; border-color: #10B981; color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+        /* 頂部選單樣式 */
+        .tab-button { flex: 1; padding: 12px 0; border-radius: 16px; font-size: 11px; font-weight: bold; transition: all 0.3s; color: #9ca3af; }
+        .tab-button.active { background: white; color: #4b5563; shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
         
-        .card-shadow { box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-        .iframe-container { flex-grow: 1; width: 100%; border: none; height: calc(100vh - 160px); }
+        /* Day 切換按鈕樣式 */
+        .day-scroller { display: flex; overflow-x: auto; gap: 10px; padding: 10px 0; scrollbar-width: none; }
+        .day-scroller::-webkit-scrollbar { display: none; }
+        .day-circle { min-width: 55px; height: 55px; border-radius: 50%; border: 2px solid white; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255,255,255,0.4); color: #7A91B1; transition: 0.3s; }
+        .day-circle.active { background: white; border-color: white; color: #ef4444; font-weight: bold; transform: scale(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
+        .trip-card { background: white; border-radius: 2.5rem; border: 1px solid #fee2e2; }
+        .hotel-highlight { border: 2px solid #fadadd; background: linear-gradient(135deg, #fff5f7 0%, #ffffff 100%); }
+        .iframe-container { width: 100%; border: none; height: calc(100vh - 260px); }
     </style>
 </head>
 <body>
-    <div id="app" v-cloak class="max-w-md mx-auto min-h-screen relative flex flex-col bg-[#F8FAF9]">
+    <div id="app" v-cloak class="max-w-md mx-auto min-h-screen relative flex flex-col bg-[#FFFEF8] shadow-2xl">
         
-        <div v-if="view === 'trip'" class="bg-[#0D6D5D] p-6 pb-4 text-white">
-            <div class="flex items-center justify-between mb-4">
-                <button @click="view = 'main'"><i class="fas fa-arrow-left"></i></button>
+        <div v-if="view === 'trip'" class="bg-[#fadadd] p-4 pb-2 sticky top-0 z-50">
+            <div class="flex items-center justify-between mb-4 px-2">
+                <button @click="view = 'main'" class="w-10 h-10 rounded-full bg-white/50 flex items-center justify-center text-gray-700"><i class="fas fa-home"></i></button>
                 <div class="text-center">
-                    <h2 class="font-bold text-lg">{{ isChinese ? '青森仙台' : activeTrip }} <span class="bg-white/20 px-2 py-0.5 rounded-full text-xs font-normal">{{ totalDays }}天</span></h2>
-                    <p class="text-[10px] opacity-80">{{ TRIP_CONFIG[activeTrip]?.dateRange }}</p>
+                    <p class="text-[9px] font-bold text-[#7A91B1] uppercase tracking-widest">'26 MARCH</p>
+                    <h2 class="font-bold text-lg text-gray-800">{{ activeTripIcon }} {{ isChinese ? '青森仙台' : activeTrip }}</h2>
                 </div>
-                <button @click="fetchData"><i class="fas fa-sync-alt"></i></button>
+                <button @click="openGoogleMapsList" class="w-10 h-10 rounded-full bg-white/50 flex items-center justify-center text-gray-700"><i class="fas fa-map-marked-alt"></i></button>
             </div>
 
-            <div class="day-scroller">
-                <button v-for="d in totalDays" :key="d" @click="selectedDay = d" :class="selectedDay === d ? 'active' : 'text-gray-200'" class="day-btn">
-                    <span class="text-[10px] font-bold opacity-60">D{{ d }}</span>
-                    <span class="font-bold">{{ getDayLabel(d) }}</span>
+            <div class="flex p-1 bg-black/5 rounded-2xl mb-4">
+                <button v-for="tab in tabs" :key="tab.id" @click="currentTab = tab.id" :class="{active: currentTab === tab.id}" class="tab-button">
+                    <span class="block text-sm mb-0.5">{{ tab.icon }}</span>
+                    {{ isChinese ? tab.cn : tab.en }}
+                </button>
+            </div>
+
+            <div v-if="currentTab === 'schedule'" class="day-scroller px-2">
+                <button v-for="d in totalDays" :key="d" @click="selectedDay = d" :class="{active: selectedDay === d}" class="day-circle">
+                    <span class="text-[8px] font-bold opacity-60 uppercase">Day</span>
+                    <span class="text-sm font-black">{{ d }}</span>
                 </button>
             </div>
         </div>
 
-        <div v-if="view === 'main'" class="p-8 bg-white min-h-screen">
-            <h1 class="text-4xl font-black mb-2 mt-12 text-gray-800 tracking-tighter">Karina's<br>Planner🤍</h1>
+        <div v-if="view === 'main'" class="p-8">
+            <h1 class="text-4xl font-black mb-2 mt-12 text-gray-800">Karina's Planner🤍</h1>
             <p class="text-gray-400 mb-10 italic">2026 Collection</p>
             <div class="space-y-4">
-                <div v-for="(info, id) in TRIP_CONFIG" :key="id" @click="enterTrip(id)" class="relative bg-white rounded-[2rem] p-6 card-shadow border border-gray-100 cursor-pointer overflow-hidden">
-                    <div class="absolute right-[-10px] bottom-[-10px] text-7xl opacity-5">{{ info.icon }}</div>
-                    <span class="text-[10px] font-bold text-[#10B981] bg-[#10B981]/10 px-3 py-1 rounded-full uppercase">{{ info.dateRange }}</span>
+                <div v-for="(info, id) in TRIP_CONFIG" :key="id" @click="enterTrip(id)" class="trip-card relative p-6 shadow-lg cursor-pointer overflow-hidden">
+                    <div class="absolute right-[-10px] top-[-10px] text-6xl opacity-10">{{ info.icon }}</div>
+                    <span class="text-[10px] font-bold text-white bg-[#7A91B1] px-3 py-1 rounded-full">{{ info.dateRange }}</span>
                     <h2 class="text-2xl font-bold text-gray-800 mt-3">{{ info.displayName }}</h2>
                 </div>
             </div>
         </div>
 
-        <div v-if="view === 'trip'" class="flex-grow flex flex-col">
+        <div v-if="view === 'trip'" class="flex-grow">
             
-            <div v-show="currentTab === 'schedule'" class="p-4 pb-32 overflow-y-auto">
-                <div v-if="hotelTonight" class="mb-4 bg-white p-4 rounded-3xl card-shadow border-l-4 border-pink-400 flex items-center justify-between">
-                    <div>
-                        <p class="text-[10px] font-bold text-pink-400 uppercase tracking-widest">Stay Tonight</p>
-                        <p class="font-bold text-gray-800">{{ hotelTonight.location }}</p>
+            <div v-show="currentTab === 'schedule'" class="px-4 py-4 pb-32">
+                <div v-if="hotelTonight" class="mb-6 hotel-highlight p-4 rounded-[2rem] shadow-sm flex items-center gap-4">
+                    <div class="text-2xl">🏨</div>
+                    <div class="flex-grow">
+                        <p class="text-[10px] font-bold text-pink-400 uppercase">Stay Tonight</p>
+                        <p class="font-bold text-gray-800 text-sm">{{ hotelTonight.location }}</p>
                     </div>
-                    <button @click="directToMap(hotelTonight.location)" class="bg-gray-100 p-3 rounded-2xl text-[#10B981]"><i class="fas fa-location-arrow"></i></button>
+                    <button @click="directToMap(hotelTonight.location)" class="bg-[#7A91B1] text-white px-4 py-2 rounded-xl text-xs font-bold">導航</button>
                 </div>
 
                 <div class="space-y-4">
-                    <div v-for="item in filteredSchedule" :key="item.id" class="bg-white rounded-3xl p-5 card-shadow">
+                    <div v-for="item in filteredSchedule" :key="item.id" class="bg-white rounded-[2rem] p-5 shadow-sm border border-gray-50">
                         <div class="flex items-center gap-4">
                             <div class="text-center min-w-[50px]">
-                                <p class="text-lg font-black text-gray-800">{{ item.time || '--:--' }}</p>
-                                <span class="text-[20px]">{{ item.icon }}</span>
+                                <span class="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-bold">Day {{ selectedDay }}</span>
+                                <p class="text-lg font-black text-gray-700 mt-1">{{ item.time || '--:--' }}</p>
                             </div>
                             <div class="flex-grow">
-                                <h4 class="font-bold text-gray-800">{{ item.location }}</h4>
-                                <div v-if="item.is_transport" class="text-xs text-gray-400 mt-1">
-                                    <i class="fas fa-long-arrow-alt-right"></i> {{ item.end_location }} ({{ item.transport_no }})
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xl">{{ item.icon }}</span>
+                                    <h4 class="font-bold text-gray-800">{{ item.location }}</h4>
                                 </div>
                                 <div class="flex gap-4 mt-3">
-                                    <button @click="directToMap(item.location)" class="text-[10px] font-bold text-gray-400 uppercase"><i class="fas fa-map-marker-alt"></i> Map</button>
-                                    <button @click="deleteItem(item.id, 'trips')" class="text-[10px] font-bold text-red-200 uppercase ml-auto">Delete</button>
+                                    <button @click="directToMap(item.location)" class="text-[10px] font-bold text-[#7A91B1] uppercase flex items-center gap-1"><i class="fas fa-location-arrow text-[8px]"></i> 立即導航</button>
+                                    <button @click="deleteItem(item.id, 'trips')" class="text-[10px] font-bold text-red-100 uppercase ml-auto">Delete</button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <button @click="openModal('schedule')" class="w-full py-5 bg-white border-2 border-dashed border-gray-200 rounded-3xl text-gray-400 font-bold mt-4">+ 新增 {{ selectedDay }} 日行程</button>
+                    <button @click="openModal('schedule')" class="w-full py-5 bg-white border-2 border-dashed border-pink-100 rounded-[2rem] text-pink-300 font-bold">+ 新增 D{{ selectedDay }} 計畫</button>
                 </div>
             </div>
 
-            <div v-show="currentTab === 'translate'" class="flex-grow">
-                <iframe :src="translateLink" class="w-full h-full" style="height: calc(100vh - 160px);"></iframe>
+            <div v-show="currentTab === 'translate'" class="flex flex-col">
+                <iframe :src="translateLink" class="iframe-container"></iframe>
             </div>
 
-            <div v-show="currentTab === 'split'" class="flex-grow">
-                <iframe :src="currentSpliitoLink" class="iframe-container"></iframe>
-            </div>
-
-            <div v-show="currentTab === 'wishlist'" class="p-4 overflow-y-auto">
-                 <div class="space-y-3">
-                    <div v-for="item in currentWishlist" :key="item.id" class="bg-white rounded-2xl p-4 card-shadow flex justify-between items-center">
+            <div v-show="currentTab === 'wishlist'" class="px-4 py-4 overflow-y-auto">
+                <div class="space-y-3">
+                    <div v-for="item in currentWishlist" :key="item.id" class="bg-white rounded-2xl p-4 shadow-sm flex justify-between items-center">
                         <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-full bg-green-50 text-[#10B981] flex items-center justify-center text-xs font-bold">{{ item.owner?.substring(0,1) }}</span>
+                            <div class="w-8 h-8 rounded-full bg-pink-50 text-pink-400 flex items-center justify-center text-[10px] font-bold">{{ item.owner?.substring(0,1) }}</div>
                             <h4 class="font-bold text-gray-800 text-sm">{{ item.item_name }}</h4>
                         </div>
-                        <button @click="deleteItem(item.id, 'wishlist')" class="text-red-100"><i class="fas fa-trash-alt text-xs"></i></button>
+                        <button @click="deleteItem(item.id, 'wishlist')" class="text-red-100 p-2"><i class="fas fa-trash-alt text-xs"></i></button>
                     </div>
-                    <button @click="openModal('wishlist')" class="w-full py-4 bg-white border-2 border-dashed border-green-200 rounded-2xl text-green-400 font-bold text-sm">+ 新增購物/必吃</button>
+                    <button @click="openModal('wishlist')" class="w-full py-4 bg-white border-2 border-dashed border-pink-100 rounded-2xl text-pink-300 font-bold text-sm">+ 新增購物/必吃</button>
                 </div>
+            </div>
+
+            <div v-show="currentTab === 'split'" class="flex flex-col">
+                <iframe :src="currentSpliitoLink" class="iframe-container"></iframe>
             </div>
         </div>
 
-        <div v-if="view === 'trip'" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-3 pb-8 flex justify-around items-center z-50">
-            <button v-for="tab in tabs" :key="tab.id" @click="currentTab = tab.id" :class="currentTab === tab.id ? 'text-[#10B981]' : 'text-gray-300'" class="flex flex-col items-center gap-1">
-                <i :class="tab.iconClass" class="text-xl"></i>
-                <span class="text-[10px] font-bold uppercase">{{ isChinese ? tab.cn : tab.en }}</span>
-            </button>
-        </div>
-
-        <div v-if="showModal" class="fixed inset-0 z-[100] flex items-end bg-black/50" @click.self="showModal = false">
-            <div class="bg-white w-full rounded-t-[3rem] p-8 card-shadow overflow-y-auto max-h-[85vh]">
-                <h3 class="text-xl font-bold mb-6 text-center">新增 D{{ selectedDay }} 計畫</h3>
+        <div v-if="showModal" class="fixed inset-0 z-[100] flex items-end p-4 bg-black/40 backdrop-blur-sm" @click.self="showModal = false">
+            <div class="bg-[#FFFEF8] w-full max-w-sm mx-auto rounded-[2.5rem] p-8 shadow-2xl overflow-y-auto max-h-[85vh]">
+                <h3 class="text-center font-bold text-gray-700 mb-6">新增 D{{ selectedDay }} 計畫</h3>
                 <div v-if="modalMode === 'schedule'" class="space-y-4">
-                    <div class="flex bg-gray-100 p-1 rounded-2xl mb-4">
-                        <button @click="form.is_transport = false; form.is_hotel = false" :class="!form.is_transport && !form.is_hotel ? 'bg-white shadow' : 'text-gray-400'" class="flex-1 py-2 rounded-xl text-xs font-bold transition-all">一般</button>
-                        <button @click="form.is_transport = true; form.is_hotel = false" :class="form.is_transport ? 'bg-white shadow' : 'text-gray-400'" class="flex-1 py-2 rounded-xl text-xs font-bold transition-all">交通</button>
-                        <button @click="form.is_hotel = true; form.is_transport = false" :class="form.is_hotel ? 'bg-white shadow' : 'text-gray-400'" class="flex-1 py-2 rounded-xl text-xs font-bold transition-all">飯店</button>
+                    <div class="flex bg-gray-100 p-1 rounded-2xl">
+                        <button @click="form.is_transport = false; form.is_hotel = false" :class="{active: !form.is_transport && !form.is_hotel}" class="tab-button">一般</button>
+                        <button @click="form.is_transport = true; form.is_hotel = false" :class="{active: form.is_transport}" class="tab-button">交通</button>
+                        <button @click="form.is_hotel = true; form.is_transport = false" :class="{active: form.is_hotel}" class="tab-button">飯店</button>
                     </div>
-                    <input v-model="form.time" type="time" class="w-full bg-gray-50 p-4 rounded-2xl border-none text-sm">
-                    <div class="flex justify-between p-2 bg-gray-50 rounded-2xl">
-                        <button v-for="ico in ['🍽️', '☕', '🛍️', '⛩️', '🏨', '📷', '🚶']" @click="form.icon = ico" :class="form.icon === ico ? 'bg-white shadow scale-110' : ''" class="w-8 h-8 rounded-xl text-lg transition-all">{{ ico }}</button>
+                    <input v-model="form.time" type="time" class="w-full bg-white p-4 rounded-2xl shadow-inner text-sm border-none">
+                    <div class="flex justify-between p-2 bg-white rounded-2xl shadow-inner">
+                        <button v-for="ico in ['🍽️', '☕', '🛍️', '⛩️', '🏨', '📷', '🚶']" @click="form.icon = ico" :class="form.icon === ico ? 'bg-pink-100 scale-110' : ''" class="w-8 h-8 rounded-xl text-lg transition-all">{{ ico }}</button>
                     </div>
-                    <input v-model="form.location" type="text" placeholder="名稱" class="w-full bg-gray-50 p-4 rounded-2xl border-none text-sm">
-                    <div v-if="form.is_transport" class="space-y-4">
-                        <input v-model="form.transport_no" type="text" placeholder="航班/車次" class="w-full bg-gray-50 p-4 rounded-2xl border-none text-sm">
-                        <input v-model="form.end_location" type="text" placeholder="抵達哪裡" class="w-full bg-gray-50 p-4 rounded-2xl border-none text-sm">
-                        <input v-model="form.arrival_time" type="time" class="w-full bg-gray-50 p-4 rounded-2xl border-none text-sm">
-                    </div>
+                    <input v-model="form.location" type="text" placeholder="輸入名稱" class="w-full bg-white p-4 rounded-2xl shadow-inner text-sm border-none">
                 </div>
                 <div v-else class="space-y-4">
-                    <input v-model="form.item_name" type="text" placeholder="想要什麼？" class="w-full bg-gray-50 p-4 rounded-2xl border-none text-sm">
+                    <input v-model="form.item_name" type="text" placeholder="想要買什麼或吃什麼？" class="w-full bg-white p-4 rounded-2xl shadow-inner text-sm border-none">
                 </div>
-                <div class="flex gap-4 mt-8 pb-4">
+                <div class="flex gap-4 mt-8">
                     <button @click="showModal = false" class="flex-1 py-4 text-gray-400 font-bold">取消</button>
-                    <button @click="addItem" class="flex-[2] py-4 bg-[#10B981] text-white rounded-2xl font-bold">儲存計畫</button>
+                    <button @click="addItem" class="flex-[2] py-4 bg-[#7A91B1] text-white rounded-2xl font-bold shadow-lg">確定儲存</button>
                 </div>
             </div>
         </div>
@@ -160,7 +160,7 @@
                 const view = ref('main'); const currentTab = ref('schedule'); const activeTrip = ref('');
                 const selectedDay = ref(1); const showModal = ref(false); const modalMode = ref('schedule');
                 const tripsData = reactive({ trips: [], wishlist: [] });
-                const form = reactive({ time: '', location: '', icon: '📍', is_hotel: false, is_transport: false, transport_no: '', end_location: '', arrival_time: '', item_name: '', owner: 'Karina', category: 'Eat' });
+                const form = reactive({ time: '', location: '', icon: '📍', is_hotel: false, is_transport: false, item_name: '' });
 
                 const TRIP_CONFIG = {
                     'Seoul': { icon: '🇰🇷', displayName: 'Seoul 7D6N', dateRange: "02/28 - 03/06", start: '2026-02-28', days: 7, spliito: 'https://spliito.com/group/01KDZPAG11CXR5SH9XEHCZ3DVX', lang: 'ko' },
@@ -180,22 +180,22 @@
                     const dateStr = targetDate.toISOString().split('T')[0];
 
                     let payload = (modalMode.value === 'schedule') ? 
-                    { trip_name: activeTrip.value, date: dateStr, location: form.location, time: form.time, icon: form.icon, is_hotel: !!form.is_hotel, is_transport: !!form.is_transport, transport_no: form.transport_no, end_location: form.end_location, arrival_time: form.arrival_time } :
-                    { trip_name: activeTrip.value, item_name: form.item_name, owner: 'Karina', category: 'Eat' };
+                    { trip_name: activeTrip.value, date: dateStr, location: form.location, time: form.time, icon: form.icon, is_hotel: !!form.is_hotel, is_transport: !!form.is_transport } :
+                    { trip_name: activeTrip.value, item_name: form.item_name, owner: 'Karina', category: 'Wish' };
 
                     await _supabase.from(modalMode.value === 'schedule' ? 'trips' : 'wishlist').insert([payload]);
                     await fetchData(); showModal.value = false;
-                    Object.assign(form, { location: '', transport_no: '', end_location: '', is_hotel: false, is_transport: false });
+                    Object.assign(form, { location: '', is_hotel: false, is_transport: false, item_name: '' });
                 };
 
                 return { 
                     view, currentTab, activeTrip, selectedDay, TRIP_CONFIG, showModal, modalMode, form, tripsData,
                     isChinese: computed(() => activeTrip.value === 'JapanNorthEast'),
                     tabs: [
-                        { id: 'schedule', iconClass: 'far fa-calendar-alt', en: 'Schedule', cn: '行程' },
-                        { id: 'translate', iconClass: 'fas fa-language', en: 'Translate', cn: '翻譯' },
-                        { id: 'wishlist', iconClass: 'far fa-heart', en: 'Wishlist', cn: '清單' },
-                        { id: 'split', iconClass: 'fas fa-wallet', en: 'Split', cn: '支出' }
+                        { id: 'schedule', icon: '📍', en: 'SCHEDULE', cn: '行程表' },
+                        { id: 'translate', icon: '🌍', en: 'TRANSLATE', cn: '翻譯' },
+                        { id: 'wishlist', icon: '✨', en: 'WISHLIST', cn: '清單' },
+                        { id: 'split', icon: '💰', en: 'SPLIT', cn: '結帳' }
                     ],
                     totalDays: computed(() => TRIP_CONFIG[activeTrip.value]?.days || 1),
                     filteredSchedule: computed(() => {
@@ -217,16 +217,12 @@
                     currentWishlist: computed(() => tripsData.wishlist),
                     translateLink: computed(() => `https://translate.google.com/?sl=zh-TW&tl=${TRIP_CONFIG[activeTrip.value]?.lang || 'ja'}&op=translate`),
                     currentSpliitoLink: computed(() => TRIP_CONFIG[activeTrip.value]?.spliito || '#'),
+                    activeTripIcon: computed(() => TRIP_CONFIG[activeTrip.value]?.icon),
                     enterTrip: (id) => { activeTrip.value = id; view.value = 'trip'; selectedDay.value = 1; fetchData(); },
-                    getDayLabel: (d) => {
-                        const date = new Date(TRIP_CONFIG[activeTrip.value].start);
-                        date.setDate(date.getDate() + (d - 1));
-                        return `${date.getMonth()+1}/${date.getDate()}`;
-                    },
                     openModal: (m) => { modalMode.value = m; showModal.value = true; },
-                    addItem, fetchData,
-                    deleteItem: async (id, table) => { if(confirm('刪除項目？')) { await _supabase.from(table).delete().eq('id', id); fetchData(); } },
-                    directToMap: (loc) => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`, '_blank')
+                    addItem, deleteItem: async (id, table) => { if(confirm('確定刪除？')) { await _supabase.from(table).delete().eq('id', id); fetchData(); } },
+                    directToMap: (loc) => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`, '_blank'),
+                    openGoogleMapsList: () => window.open(TRIP_CONFIG[activeTrip.value]?.map || 'https://maps.google.com', '_blank')
                 };
             }
         }).mount('#app');
