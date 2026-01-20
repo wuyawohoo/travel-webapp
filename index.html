@@ -12,16 +12,10 @@
         body { background-color: #FFFEF8; font-family: -apple-system, "Microsoft JhengHei", sans-serif; overflow-x: hidden; }
         [v-cloak] { display: none; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        
-        /* 頂部導航按鈕樣式 */
         .tab-button { flex: 1; padding: 12px 0; border-radius: 16px; font-size: 11px; font-weight: bold; color: #9ca3af; transition: 0.3s; }
         .tab-button.active { background: white; color: #4b5563; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        
-        /* Day 圓圈按鈕 */
         .day-circle { min-width: 75px; padding: 8px 0; border-radius: 20px; border: 2px solid white; background: rgba(255,255,255,0.4); color: #7A91B1; text-align: center; transition: 0.3s; }
         .day-circle.active { background: white; color: #ef4444; border-color: #fadadd; transform: scale(1.05); }
-
-        /* 飯店看板 */
         .hotel-highlight { border: 2px solid #fadadd; background: linear-gradient(135deg, #fff5f7 0%, #ffffff 100%); border-radius: 2rem; box-shadow: 0 4px 15px rgba(250, 218, 221, 0.4); }
         .trip-card { background: white; border-radius: 2rem; border: 1px solid #fef2f2; }
     </style>
@@ -69,7 +63,6 @@
         </div>
 
         <div v-if="view === 'trip'" class="flex-grow p-4 pb-32">
-            
             <div v-show="currentTab === 'schedule'" class="space-y-4">
                 <div v-if="hotelTonight" class="hotel-highlight p-5 flex items-center gap-4">
                     <div class="text-2xl animate-bounce">🏨</div>
@@ -79,7 +72,6 @@
                     </div>
                     <button @click="directToMap(hotelTonight.location)" class="bg-[#7A91B1] text-white px-4 py-2 rounded-xl text-xs font-bold">導航</button>
                 </div>
-
                 <div v-for="item in filteredSchedule" :key="item.id" class="trip-card p-5 flex items-center gap-4 shadow-sm">
                     <div class="text-center min-w-[55px]">
                         <p class="text-[10px] font-black text-gray-300 uppercase">{{ item.time || '--:--' }}</p>
@@ -124,11 +116,10 @@
         <div v-if="showModal" class="fixed inset-0 z-[100] flex items-end p-4 bg-black/40 backdrop-blur-sm" @click.self="showModal = false">
             <div class="bg-[#FFFEF8] w-full max-w-sm mx-auto rounded-[2.5rem] p-8 shadow-2xl max-h-[85vh] overflow-y-auto">
                 <h3 class="text-center font-bold text-gray-700 mb-6">{{ isEditing ? '編輯項目' : '新增項目' }}</h3>
-                
                 <div v-if="modalMode === 'schedule'" class="space-y-4">
                     <div class="flex bg-gray-100 p-1 rounded-2xl">
                         <button @click="form.is_hotel=false; if(!isEditing) form.icon='📍'" :class="{active: !form.is_hotel}" class="tab-button">一般/交通</button>
-                        <button @click="form.is_hotel=true; if(!isEditing) form.icon='🏨'" :class="{active: form.is_hotel}" class="tab-button">飯店 (Stay Tonight)</button>
+                        <button @click="form.is_hotel=true; if(!isEditing) form.icon='🏨'" :class="{active: form.is_hotel}" class="tab-button">飯店</button>
                     </div>
                     <input v-model="form.time" type="time" class="w-full bg-white p-4 rounded-2xl shadow-inner text-sm border-none">
                     <div class="flex justify-between p-2 bg-white rounded-2xl shadow-inner overflow-x-auto no-scrollbar gap-2">
@@ -136,7 +127,6 @@
                     </div>
                     <input v-model="form.location" type="text" placeholder="名稱或地點" class="w-full bg-white p-4 rounded-2xl shadow-inner text-sm border-none">
                 </div>
-
                 <div v-if="modalMode === 'wishlist'" class="space-y-4">
                     <input v-model="form.item_name" type="text" placeholder="想要買/吃的東西" class="w-full bg-white p-4 rounded-2xl shadow-inner text-sm border-none">
                     <div class="flex gap-2">
@@ -149,7 +139,6 @@
                         </select>
                     </div>
                 </div>
-
                 <div class="flex gap-4 mt-8">
                     <button @click="showModal = false" class="flex-1 py-4 text-gray-400 font-bold">取消</button>
                     <button @click="saveItem" class="flex-[2] py-4 bg-[#7A91B1] text-white rounded-2xl font-bold">儲存項目</button>
@@ -166,11 +155,10 @@
             setup() {
                 const urlParams = new URLSearchParams(window.location.search);
                 const pass = urlParams.get('pass');
-
                 const TRIP_CONFIG = {
-                    'Seoul': { icon: '🇰🇷', displayName: 'Seoul 8D7N', dateRange: "02/28 - 03/07", start: '2026-02-28', days: 8, spliito: 'https://spliito.com/group/01KDZPAG11CXR5SH9XEHCZ3DVX', lang: 'ko', members: ['Karina', 'Annette'] },
-                    'Tokyo': { icon: '🇯🇵', displayName: 'Tokyo 5D4N', dateRange: "03/07 - 03/11", start: '2026-03-07', days: 5, spliito: 'https://spliito.com/group/01KE036WEZZKSFRFVG33KNQEB8', lang: 'ja', members: ['Karina', 'Cherry'] },
-                    'JapanNorthEast': { icon: '🇯🇵', displayName: '青森仙台 5D4Y', dateRange: "03/12 - 03/16", start: '2026-03-12', days: 5, spliito: 'https://spliito.com', lang: 'ja', members: ['Karina', '爸爸'] }
+                    'Seoul': { icon: '🇰🇷', displayName: 'Seoul 8D7N', start: '2026-02-28', dateRange: "02/28 - 03/07", days: 8, spliito: 'https://spliito.com/group/01KDZPAG11CXR5SH9XEHCZ3DVX', lang: 'ko', members: ['Karina', 'Annette'] },
+                    'Tokyo': { icon: '🇯🇵', displayName: 'Tokyo 5D4N', start: '2026-03-07', dateRange: "03/07 - 03/11", days: 5, spliito: 'https://spliito.com/group/01KE036WEZZKSFRFVG33KNQEB8', lang: 'ja', members: ['Karina', 'Cherry'] },
+                    'JapanNorthEast': { icon: '🇯🇵', displayName: '青森仙台 5D4Y', start: '2026-03-12', dateRange: "03/12 - 03/16", days: 5, spliito: 'https://spliito.com', lang: 'ja', members: ['Karina', '爸爸'] }
                 };
 
                 const filteredTripConfig = computed(() => {
@@ -187,7 +175,6 @@
                 const modalMode = ref('schedule');
                 const isEditing = ref(false);
                 const editingId = ref(null);
-                
                 const tripsData = reactive({ trips: [], wishlist: [] });
                 const form = reactive({ time: '', location: '', icon: '📍', is_hotel: false, item_name: '', owner: 'Karina', category: '購物 🛍️' });
 
@@ -203,19 +190,12 @@
                     const targetDate = new Date(trip.start);
                     targetDate.setDate(targetDate.getDate() + (selectedDay.value - 1));
                     const dateStr = targetDate.toISOString().split('T')[0];
+                    let payload = (modalMode.value === 'schedule') 
+                        ? { trip_name: activeTrip.value, date: dateStr, location: form.location, time: form.time || null, icon: form.icon, is_hotel: Boolean(form.is_hotel) }
+                        : { trip_name: activeTrip.value, item_name: form.item_name, owner: form.owner, category: form.category };
 
-                    let payload;
-                    if (modalMode.value === 'schedule') {
-                        payload = { trip_name: activeTrip.value, date: dateStr, location: form.location, time: form.time || null, icon: form.icon, is_hotel: Boolean(form.is_hotel) };
-                    } else {
-                        payload = { trip_name: activeTrip.value, item_name: form.item_name, owner: form.owner, category: form.category };
-                    }
-
-                    if (isEditing.value) {
-                        await _supabase.from(modalMode.value === 'schedule' ? 'trips' : 'wishlist').update(payload).eq('id', editingId.value);
-                    } else {
-                        await _supabase.from(modalMode.value === 'schedule' ? 'trips' : 'wishlist').insert([payload]);
-                    }
+                    if (isEditing.value) await _supabase.from(modalMode.value === 'schedule' ? 'trips' : 'wishlist').update(payload).eq('id', editingId.value);
+                    else await _supabase.from(modalMode.value === 'schedule' ? 'trips' : 'wishlist').insert([payload]);
                     await fetchData();
                     showModal.value = false;
                 };
@@ -223,23 +203,14 @@
                 return {
                     view, currentTab, activeTrip, selectedDay, TRIP_CONFIG, filteredTripConfig, showModal, modalMode, isEditing, form, tripsData,
                     activeConfig: computed(() => TRIP_CONFIG[activeTrip.value] || {}),
-                    tabs: [
-                        { id: 'schedule', icon: '📍', en: 'SCHEDULE' },
-                        { id: 'wishlist', icon: '✨', en: 'WISHLIST' },
-                        { id: 'split', icon: '💰', en: 'SPLIT' }
-                    ],
+                    tabs: [{ id: 'schedule', icon: '📍', en: 'SCHEDULE' }, { id: 'wishlist', icon: '✨', en: 'WISHLIST' }, { id: 'split', icon: '💰', en: 'SPLIT' }],
                     filteredSchedule: computed(() => tripsData.trips.filter(i => {
-                        const start = new Date(TRIP_CONFIG[activeTrip.value].start);
-                        const curr = new Date(i.date);
-                        const diff = Math.floor((curr - start) / 86400000) + 1;
+                        const diff = Math.floor((new Date(i.date) - new Date(TRIP_CONFIG[activeTrip.value].start)) / 86400000) + 1;
                         return diff === selectedDay.value;
                     })),
                     hotelTonight: computed(() => {
                         const start = new Date(TRIP_CONFIG[activeTrip.value].start);
-                        return tripsData.trips.find(i => {
-                            const diff = Math.floor((new Date(i.date) - start) / 86400000) + 1;
-                            return diff === selectedDay.value && i.is_hotel;
-                        });
+                        return tripsData.trips.find(i => (Math.floor((new Date(i.date)-start)/86400000)+1) === selectedDay.value && i.is_hotel);
                     }),
                     currentWishlist: computed(() => tripsData.wishlist),
                     getFullDayLabel: (d) => {
@@ -252,14 +223,17 @@
                     openEditModal: (item, mode) => { isEditing.value = true; editingId.value = item.id; modalMode.value = mode; Object.assign(form, item); showModal.value = true; },
                     openModal: (mode) => { isEditing.value = false; modalMode.value = mode; Object.assign(form, { time: '', location: '', icon: '📍', is_hotel: false, item_name: '', category: '購物 🛍️', owner: 'Karina' }); showModal.value = true; },
                     deleteItem: async (id, table) => { if(confirm('確定刪除？')) { await _supabase.from(table).delete().eq('id', id); fetchData(); } },
-                    directToMap: (loc) => window.open(`https://support.google.com/maps/answer/7280933?hl=zh-Hant&co=GENIE.Platform%3DDesktop0{encodeURIComponent(loc)}`, '_blank'),
+                    directToMap: (loc) => {
+                        // 修正：這裡應該是進行 Google Maps 搜尋導航
+                        window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`, '_blank');
+                    },
                     openTranslate: () => window.open(`https://translate.google.com/?sl=zh-TW&tl=${TRIP_CONFIG[activeTrip.value].lang}`, '_blank'),
                     openGoogleMapsList: () => {
-                        // 如果是東京行程，跳轉到指定的 Google Maps 清單
+                        // 東京行程開啟 Cherry 的清單
                         if (activeTrip.value === 'Tokyo') {
-                            window.open('https://www.google.com/maps26', '_blank');
+                            window.open('https://maps.app.goo.gl/TLUuu6kzwEt7aLAg8', '_blank');
                         } else {
-                            window.open('https://www.google.com/maps27', '_blank');
+                            window.open('https://www.google.com/maps', '_blank');
                         }
                     }
                 };
