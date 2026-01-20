@@ -13,7 +13,7 @@
         [v-cloak] { display: none; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         
-        /* 頂部選單按鈕樣式 */
+        /* 頂部導航按鈕樣式 */
         .tab-button { flex: 1; padding: 12px 0; border-radius: 16px; font-size: 11px; font-weight: bold; color: #9ca3af; transition: 0.3s; }
         .tab-button.active { background: white; color: #4b5563; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         
@@ -21,7 +21,7 @@
         .day-circle { min-width: 75px; padding: 8px 0; border-radius: 20px; border: 2px solid white; background: rgba(255,255,255,0.4); color: #7A91B1; text-align: center; transition: 0.3s; }
         .day-circle.active { background: white; color: #ef4444; border-color: #fadadd; transform: scale(1.05); }
 
-        /* 每日飯店看板 */
+        /* 飯店看板 */
         .hotel-highlight { border: 2px solid #fadadd; background: linear-gradient(135deg, #fff5f7 0%, #ffffff 100%); border-radius: 2rem; box-shadow: 0 4px 15px rgba(250, 218, 221, 0.4); }
         .trip-card { background: white; border-radius: 2rem; border: 1px solid #fef2f2; }
     </style>
@@ -38,7 +38,7 @@
                 </div>
                 <div class="flex gap-2">
                     <button @click="openTranslate" class="w-10 h-10 rounded-full bg-white/50 flex items-center justify-center text-gray-700"><i class="fas fa-language"></i></button>
-                    <button @click="openGoogleMapsList" class="w-10 h-10 rounded-full bg-white/50 flex items-center justify-center text-gray-700"><i class="fas fa-map-marked-alt"></i></button>
+                    <button @click="openGoogleMapsList" class="w-10 h-10 rounded-full bg-white/50 flex items-center justify-center text-gray-700 shadow-sm"><i class="fas fa-map-marked-alt text-pink-500"></i></button>
                 </div>
             </div>
 
@@ -71,7 +71,7 @@
         <div v-if="view === 'trip'" class="flex-grow p-4 pb-32">
             
             <div v-show="currentTab === 'schedule'" class="space-y-4">
-                <div v-if="hotelTonight" class="hotel-highlight p-5 shadow-sm flex items-center gap-4 border-2 border-[#fadadd]">
+                <div v-if="hotelTonight" class="hotel-highlight p-5 flex items-center gap-4">
                     <div class="text-2xl animate-bounce">🏨</div>
                     <div class="flex-grow">
                         <p class="text-[9px] font-bold text-pink-400 uppercase tracking-widest">STAY TONIGHT</p>
@@ -80,7 +80,7 @@
                     <button @click="directToMap(hotelTonight.location)" class="bg-[#7A91B1] text-white px-4 py-2 rounded-xl text-xs font-bold">導航</button>
                 </div>
 
-                <div v-for="item in filteredSchedule" :key="item.id" class="trip-card p-5 shadow-sm flex items-center gap-4">
+                <div v-for="item in filteredSchedule" :key="item.id" class="trip-card p-5 flex items-center gap-4 shadow-sm">
                     <div class="text-center min-w-[55px]">
                         <p class="text-[10px] font-black text-gray-300 uppercase">{{ item.time || '--:--' }}</p>
                         <span class="text-xl block mt-1">{{ item.icon }}</span>
@@ -94,7 +94,7 @@
                         </div>
                     </div>
                 </div>
-                <button @click="openModal('schedule')" class="w-full py-5 bg-white border-2 border-dashed border-pink-100 rounded-[2rem] text-pink-300 font-bold hover:bg-pink-50 transition-colors">+ 新增 D{{ selectedDay }} 計畫/飯店</button>
+                <button @click="openModal('schedule')" class="w-full py-5 bg-white border-2 border-dashed border-pink-100 rounded-[2rem] text-pink-300 font-bold">+ 新增計畫/飯店</button>
             </div>
 
             <div v-show="currentTab === 'wishlist'" class="space-y-3">
@@ -103,7 +103,9 @@
                         <span class="text-xl">{{ item.category.includes('購物') ? '🛍️' : '🍽️' }}</span>
                         <div>
                             <h4 class="font-bold text-gray-800 text-sm">{{ item.item_name }}</h4>
-                            <p class="text-[9px] font-bold text-gray-400 uppercase">{{ item.category }} · BY {{ item.owner }}</p>
+                            <p class="text-[9px] font-bold text-gray-400 uppercase">
+                                {{ item.category }} · <span :class="item.owner === 'Both' ? 'text-pink-400 font-black' : ''">FOR {{ item.owner }}</span>
+                            </p>
                         </div>
                     </div>
                     <div class="flex gap-2">
@@ -121,14 +123,14 @@
 
         <div v-if="showModal" class="fixed inset-0 z-[100] flex items-end p-4 bg-black/40 backdrop-blur-sm" @click.self="showModal = false">
             <div class="bg-[#FFFEF8] w-full max-w-sm mx-auto rounded-[2.5rem] p-8 shadow-2xl max-h-[85vh] overflow-y-auto">
-                <h3 class="text-center font-bold text-gray-700 mb-6">{{ isEditing ? '編輯項目' : '新增 D' + selectedDay + ' 項目' }}</h3>
+                <h3 class="text-center font-bold text-gray-700 mb-6">{{ isEditing ? '編輯項目' : '新增項目' }}</h3>
                 
                 <div v-if="modalMode === 'schedule'" class="space-y-4">
                     <div class="flex bg-gray-100 p-1 rounded-2xl">
                         <button @click="form.is_hotel=false; if(!isEditing) form.icon='📍'" :class="{active: !form.is_hotel}" class="tab-button">一般/交通</button>
                         <button @click="form.is_hotel=true; if(!isEditing) form.icon='🏨'" :class="{active: form.is_hotel}" class="tab-button">飯店 (Stay Tonight)</button>
                     </div>
-                    <input v-model="form.time" type="time" class="w-full bg-white p-4 rounded-2xl shadow-inner text-sm border-none focus:ring-2 ring-pink-100">
+                    <input v-model="form.time" type="time" class="w-full bg-white p-4 rounded-2xl shadow-inner text-sm border-none">
                     <div class="flex justify-between p-2 bg-white rounded-2xl shadow-inner overflow-x-auto no-scrollbar gap-2">
                         <button v-for="ico in ['🍽️', '☕', '🛍️', '⛩️', '🏨', '📷', '🚶', '✈️', '🚆', '🚕']" @click="form.icon = ico" :class="form.icon === ico ? 'bg-pink-100 scale-110' : ''" class="min-w-[32px] h-8 rounded-xl text-lg transition-all">{{ ico }}</button>
                     </div>
@@ -143,14 +145,14 @@
                             <option value="必吃 🍽️">必吃 🍽️</option>
                         </select>
                         <select v-model="form.owner" class="flex-1 bg-white p-4 rounded-2xl shadow-inner text-xs border-none appearance-none">
-                            <option v-for="m in activeConfig.members" :key="m" :value="m">By {{ m }}</option>
+                            <option v-for="m in [...activeConfig.members, 'Both']" :key="m" :value="m">{{ m === 'Both' ? 'For Both ❤️' : 'For ' + m }}</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="flex gap-4 mt-8">
                     <button @click="showModal = false" class="flex-1 py-4 text-gray-400 font-bold">取消</button>
-                    <button @click="saveItem" class="flex-[2] py-4 bg-[#7A91B1] text-white rounded-2xl font-bold shadow-lg active:scale-95 transition-transform">儲存項目</button>
+                    <button @click="saveItem" class="flex-[2] py-4 bg-[#7A91B1] text-white rounded-2xl font-bold">儲存項目</button>
                 </div>
             </div>
         </div>
@@ -158,12 +160,10 @@
 
     <script>
         const { createApp, ref, reactive, computed } = Vue;
-        // 初始化 Supabase
         const _supabase = supabase.createClient('https://wutwyafokyebqzhfdrct.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1dHd5YWZva3llYnF6aGZkcmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgzNDMyNjYsImV4cCI6MjA4MzkxOTI2Nn0.2qvKu3Wwee7zT1vp0G3pMOhRHuObJSuK8Sy9qWdNxJ4');
 
         createApp({
             setup() {
-                // --- 門禁與分流邏輯 ---
                 const urlParams = new URLSearchParams(window.location.search);
                 const pass = urlParams.get('pass');
 
@@ -176,10 +176,9 @@
                 const filteredTripConfig = computed(() => {
                     if (pass === 'cherry_tokyo') return { 'Tokyo': TRIP_CONFIG['Tokyo'] };
                     if (pass === 'annette_seoul') return { 'Seoul': TRIP_CONFIG['Seoul'] };
-                    return TRIP_CONFIG; // 管理者看到全部
+                    return TRIP_CONFIG;
                 });
 
-                // --- 狀態定義 ---
                 const view = ref('main');
                 const currentTab = ref('schedule');
                 const activeTrip = ref('');
@@ -192,7 +191,6 @@
                 const tripsData = reactive({ trips: [], wishlist: [] });
                 const form = reactive({ time: '', location: '', icon: '📍', is_hotel: false, item_name: '', owner: 'Karina', category: '購物 🛍️' });
 
-                // --- 資料抓取 ---
                 const fetchData = async () => {
                     const { data: t } = await _supabase.from('trips').select('*').eq('trip_name', activeTrip.value).order('time', {ascending: true});
                     const { data: w } = await _supabase.from('wishlist').select('*').eq('trip_name', activeTrip.value).order('id', {ascending: false});
@@ -200,10 +198,7 @@
                     tripsData.wishlist = w || [];
                 };
 
-                // --- 儲存/更新邏輯 ---
                 const saveItem = async () => {
-                    if (!form.location && !form.item_name) return alert('請輸入名稱！');
-                    
                     const trip = TRIP_CONFIG[activeTrip.value];
                     const targetDate = new Date(trip.start);
                     targetDate.setDate(targetDate.getDate() + (selectedDay.value - 1));
@@ -211,50 +206,18 @@
 
                     let payload;
                     if (modalMode.value === 'schedule') {
-                        payload = {
-                            trip_name: activeTrip.value,
-                            date: dateStr,
-                            location: form.location,
-                            time: form.time || null,
-                            icon: form.icon,
-                            is_hotel: Boolean(form.is_hotel)
-                        };
+                        payload = { trip_name: activeTrip.value, date: dateStr, location: form.location, time: form.time || null, icon: form.icon, is_hotel: Boolean(form.is_hotel) };
                     } else {
-                        payload = {
-                            trip_name: activeTrip.value,
-                            item_name: form.item_name,
-                            owner: form.owner,
-                            category: form.category
-                        };
+                        payload = { trip_name: activeTrip.value, item_name: form.item_name, owner: form.owner, category: form.category };
                     }
 
-                    try {
-                        if (isEditing.value) {
-                            await _supabase.from(modalMode.value === 'schedule' ? 'trips' : 'wishlist').update(payload).eq('id', editingId.value);
-                        } else {
-                            await _supabase.from(modalMode.value === 'schedule' ? 'trips' : 'wishlist').insert([payload]);
-                        }
-                        await fetchData();
-                        showModal.value = false;
-                    } catch (e) {
-                        alert('儲存失敗，請檢查網路！');
+                    if (isEditing.value) {
+                        await _supabase.from(modalMode.value === 'schedule' ? 'trips' : 'wishlist').update(payload).eq('id', editingId.value);
+                    } else {
+                        await _supabase.from(modalMode.value === 'schedule' ? 'trips' : 'wishlist').insert([payload]);
                     }
-                };
-
-                // --- UI 輔助函數 ---
-                const openEditModal = (item, mode) => {
-                    isEditing.value = true;
-                    editingId.value = item.id;
-                    modalMode.value = mode;
-                    Object.assign(form, item);
-                    showModal.value = true;
-                };
-
-                const openModal = (mode) => {
-                    isEditing.value = false;
-                    modalMode.value = mode;
-                    Object.assign(form, { time: '', location: '', icon: '📍', is_hotel: false, item_name: '', category: '購物 🛍️', owner: TRIP_CONFIG[activeTrip.value].members[0] });
-                    showModal.value = true;
+                    await fetchData();
+                    showModal.value = false;
                 };
 
                 return {
@@ -285,11 +248,20 @@
                         return `${date.getMonth()+1}/${date.getDate()} (${['日','一','二','三','四','五','六'][date.getDay()]})`;
                     },
                     enterTrip: (id) => { activeTrip.value = id; view.value = 'trip'; selectedDay.value = 1; fetchData(); },
-                    saveItem, openEditModal, openModal,
-                    deleteItem: async (id, table) => { if(confirm('確定要刪除嗎？')) { await _supabase.from(table).delete().eq('id', id); fetchData(); } },
-                    directToMap: (loc) => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`, '_blank'),
+                    saveItem, 
+                    openEditModal: (item, mode) => { isEditing.value = true; editingId.value = item.id; modalMode.value = mode; Object.assign(form, item); showModal.value = true; },
+                    openModal: (mode) => { isEditing.value = false; modalMode.value = mode; Object.assign(form, { time: '', location: '', icon: '📍', is_hotel: false, item_name: '', category: '購物 🛍️', owner: 'Karina' }); showModal.value = true; },
+                    deleteItem: async (id, table) => { if(confirm('確定刪除？')) { await _supabase.from(table).delete().eq('id', id); fetchData(); } },
+                    directToMap: (loc) => window.open(`https://support.google.com/maps/answer/7280933?hl=zh-Hant&co=GENIE.Platform%3DDesktop0{encodeURIComponent(loc)}`, '_blank'),
                     openTranslate: () => window.open(`https://translate.google.com/?sl=zh-TW&tl=${TRIP_CONFIG[activeTrip.value].lang}`, '_blank'),
-                    openGoogleMapsList: () => window.open('https://support.google.com/maps/answer/7280933?hl=zh-Hant&co=GENIE.Platform%3DDesktop0', '_blank')
+                    openGoogleMapsList: () => {
+                        // 如果是東京行程，跳轉到指定的 Google Maps 清單
+                        if (activeTrip.value === 'Tokyo') {
+                            window.open('https://www.google.com/maps26', '_blank');
+                        } else {
+                            window.open('https://www.google.com/maps27', '_blank');
+                        }
+                    }
                 };
             }
         }).mount('#app');
