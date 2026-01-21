@@ -63,15 +63,18 @@
         </div>
 
         <div v-if="view === 'trip'" class="flex-grow p-4 pb-32">
+            
             <div v-show="currentTab === 'schedule'" class="space-y-4">
                 <div v-if="hotelTonight" class="hotel-highlight p-5 flex items-center gap-4">
                     <div class="text-2xl animate-bounce">🏨</div>
                     <div class="flex-grow">
                         <p class="text-[9px] font-bold text-pink-400 uppercase tracking-widest">STAY TONIGHT</p>
                         <p class="font-bold text-gray-800 text-sm">{{ hotelTonight.location }}</p>
+                        <p v-if="hotelTonight.note" class="text-[10px] text-gray-400 mt-0.5 italic">{{ hotelTonight.note }}</p>
                     </div>
                     <button @click="directToMap(hotelTonight.location)" class="bg-[#7A91B1] text-white px-4 py-2 rounded-xl text-xs font-bold">導航</button>
                 </div>
+
                 <div v-for="item in filteredSchedule" :key="item.id" class="trip-card p-5 flex items-center gap-4 shadow-sm">
                     <div class="text-center min-w-[55px]">
                         <p class="text-[10px] font-black text-gray-300 uppercase">{{ item.time || '--:--' }}</p>
@@ -79,14 +82,15 @@
                     </div>
                     <div class="flex-grow">
                         <h4 class="font-bold text-gray-800 text-sm">{{ item.location }}</h4>
-                        <div class="flex gap-4 mt-3">
-                            <button @click="directToMap(item.location)" class="text-[10px] font-bold text-[#7A91B1]"><i class="fas fa-location-arrow"></i> MAP</button>
-                            <button @click="openEditModal(item, 'schedule')" class="text-[10px] font-bold text-blue-300"><i class="fas fa-edit"></i> EDIT</button>
-                            <button @click="deleteItem(item.id, 'trips')" class="text-[10px] font-bold text-red-100 ml-auto">DELETE</button>
+                        <p v-if="item.note" class="text-[11px] text-gray-400 mt-1 mb-1 leading-relaxed italic">{{ item.note }}</p>
+                        <div class="flex gap-4 mt-2">
+                            <button @click="directToMap(item.location)" class="text-[10px] font-bold text-[#7A91B1] uppercase"><i class="fas fa-location-arrow"></i> Map</button>
+                            <button @click="openEditModal(item, 'schedule')" class="text-[10px] font-bold text-blue-300 uppercase"><i class="fas fa-edit"></i> Edit</button>
+                            <button @click="deleteItem(item.id, 'trips')" class="text-[10px] font-bold text-red-100 ml-auto uppercase">Delete</button>
                         </div>
                     </div>
                 </div>
-                <button @click="openModal('schedule')" class="w-full py-5 bg-white border-2 border-dashed border-pink-100 rounded-[2rem] text-pink-300 font-bold">+ 新增計畫/飯店</button>
+                <button @click="openModal('schedule')" class="w-full py-5 bg-white border-2 border-dashed border-pink-100 rounded-[2rem] text-pink-300 font-bold">+ 新增計畫/交通</button>
             </div>
 
             <div v-show="currentTab === 'wishlist'" class="space-y-3">
@@ -114,19 +118,22 @@
         </div>
 
         <div v-if="showModal" class="fixed inset-0 z-[100] flex items-end p-4 bg-black/40 backdrop-blur-sm" @click.self="showModal = false">
-            <div class="bg-[#FFFEF8] w-full max-w-sm mx-auto rounded-[2.5rem] p-8 shadow-2xl max-h-[85vh] overflow-y-auto">
-                <h3 class="text-center font-bold text-gray-700 mb-6">{{ isEditing ? '編輯項目' : '新增項目' }}</h3>
+            <div class="bg-[#FFFEF8] w-full max-w-sm mx-auto rounded-[2.5rem] p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
+                <h3 class="text-center font-bold text-gray-700 mb-6 uppercase tracking-widest text-xs">{{ isEditing ? 'Edit Item' : 'Add Item' }}</h3>
+                
                 <div v-if="modalMode === 'schedule'" class="space-y-4">
                     <div class="flex bg-gray-100 p-1 rounded-2xl">
                         <button @click="form.is_hotel=false; if(!isEditing) form.icon='📍'" :class="{active: !form.is_hotel}" class="tab-button">一般/交通</button>
-                        <button @click="form.is_hotel=true; if(!isEditing) form.icon='🏨'" :class="{active: form.is_hotel}" class="tab-button">飯店</button>
+                        <button @click="form.is_hotel=true; if(!isEditing) form.icon='🏨'" :class="{active: form.is_hotel}" class="tab-button">飯店 (Stay Tonight)</button>
                     </div>
                     <input v-model="form.time" type="time" class="w-full bg-white p-4 rounded-2xl shadow-inner text-sm border-none">
                     <div class="flex justify-between p-2 bg-white rounded-2xl shadow-inner overflow-x-auto no-scrollbar gap-2">
-                        <button v-for="ico in ['🍽️', '☕', '🛍️', '⛩️', '🏨', '📷', '🚶', '✈️', '🚆', '🚕']" @click="form.icon = ico" :class="form.icon === ico ? 'bg-pink-100 scale-110' : ''" class="min-w-[32px] h-8 rounded-xl text-lg transition-all">{{ ico }}</button>
+                        <button v-for="ico in ['🍽️', '☕', '🛍️', '⛩️', '🏨', '📷', '🚶', '✈️', '🚆', '🚌', '🚕']" @click="form.icon = ico" :class="form.icon === ico ? 'bg-pink-100 scale-110' : ''" class="min-w-[32px] h-8 rounded-xl text-lg transition-all">{{ ico }}</button>
                     </div>
                     <input v-model="form.location" type="text" placeholder="名稱或地點" class="w-full bg-white p-4 rounded-2xl shadow-inner text-sm border-none">
+                    <textarea v-model="form.note" placeholder="備註 (例如: 出口2、預約編號...)" class="w-full bg-white p-4 rounded-2xl shadow-inner text-sm border-none h-20 resize-none"></textarea>
                 </div>
+
                 <div v-if="modalMode === 'wishlist'" class="space-y-4">
                     <input v-model="form.item_name" type="text" placeholder="想要買/吃的東西" class="w-full bg-white p-4 rounded-2xl shadow-inner text-sm border-none">
                     <div class="flex gap-2">
@@ -139,9 +146,10 @@
                         </select>
                     </div>
                 </div>
+
                 <div class="flex gap-4 mt-8">
-                    <button @click="showModal = false" class="flex-1 py-4 text-gray-400 font-bold">取消</button>
-                    <button @click="saveItem" class="flex-[2] py-4 bg-[#7A91B1] text-white rounded-2xl font-bold">儲存項目</button>
+                    <button @click="showModal = false" class="flex-1 py-4 text-gray-400 font-bold">Cancel</button>
+                    <button @click="saveItem" class="flex-[2] py-4 bg-[#7A91B1] text-white rounded-2xl font-bold">Save</button>
                 </div>
             </div>
         </div>
@@ -176,7 +184,7 @@
                 const isEditing = ref(false);
                 const editingId = ref(null);
                 const tripsData = reactive({ trips: [], wishlist: [] });
-                const form = reactive({ time: '', location: '', icon: '📍', is_hotel: false, item_name: '', owner: 'Karina', category: '購物 🛍️' });
+                const form = reactive({ time: '', location: '', icon: '📍', is_hotel: false, note: '', item_name: '', owner: 'Karina', category: '購物 🛍️' });
 
                 const fetchData = async () => {
                     const { data: t } = await _supabase.from('trips').select('*').eq('trip_name', activeTrip.value).order('time', {ascending: true});
@@ -191,11 +199,12 @@
                     targetDate.setDate(targetDate.getDate() + (selectedDay.value - 1));
                     const dateStr = targetDate.toISOString().split('T')[0];
                     let payload = (modalMode.value === 'schedule') 
-                        ? { trip_name: activeTrip.value, date: dateStr, location: form.location, time: form.time || null, icon: form.icon, is_hotel: Boolean(form.is_hotel) }
+                        ? { trip_name: activeTrip.value, date: dateStr, location: form.location, time: form.time || null, icon: form.icon, is_hotel: Boolean(form.is_hotel), note: form.note }
                         : { trip_name: activeTrip.value, item_name: form.item_name, owner: form.owner, category: form.category };
 
                     if (isEditing.value) await _supabase.from(modalMode.value === 'schedule' ? 'trips' : 'wishlist').update(payload).eq('id', editingId.value);
                     else await _supabase.from(modalMode.value === 'schedule' ? 'trips' : 'wishlist').insert([payload]);
+                    
                     await fetchData();
                     showModal.value = false;
                 };
@@ -205,7 +214,9 @@
                     activeConfig: computed(() => TRIP_CONFIG[activeTrip.value] || {}),
                     tabs: [{ id: 'schedule', icon: '📍', en: 'SCHEDULE' }, { id: 'wishlist', icon: '✨', en: 'WISHLIST' }, { id: 'split', icon: '💰', en: 'SPLIT' }],
                     filteredSchedule: computed(() => tripsData.trips.filter(i => {
-                        const diff = Math.floor((new Date(i.date) - new Date(TRIP_CONFIG[activeTrip.value].start)) / 86400000) + 1;
+                        const start = new Date(TRIP_CONFIG[activeTrip.value].start);
+                        const curr = new Date(i.date);
+                        const diff = Math.floor((curr - start) / 86400000) + 1;
                         return diff === selectedDay.value;
                     })),
                     hotelTonight: computed(() => {
@@ -220,21 +231,21 @@
                     },
                     enterTrip: (id) => { activeTrip.value = id; view.value = 'trip'; selectedDay.value = 1; fetchData(); },
                     saveItem, 
-                    openEditModal: (item, mode) => { isEditing.value = true; editingId.value = item.id; modalMode.value = mode; Object.assign(form, item); showModal.value = true; },
-                    openModal: (mode) => { isEditing.value = false; modalMode.value = mode; Object.assign(form, { time: '', location: '', icon: '📍', is_hotel: false, item_name: '', category: '購物 🛍️', owner: 'Karina' }); showModal.value = true; },
-                    deleteItem: async (id, table) => { if(confirm('確定刪除？')) { await _supabase.from(table).delete().eq('id', id); fetchData(); } },
-                    directToMap: (loc) => {
-                        // 修正：這裡應該是進行 Google Maps 搜尋導航
-                        window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`, '_blank');
+                    openEditModal: (item, mode) => { 
+                        isEditing.value = true; editingId.value = item.id; modalMode.value = mode; 
+                        Object.assign(form, item); showModal.value = true; 
                     },
+                    openModal: (mode) => { 
+                        isEditing.value = false; modalMode.value = mode; 
+                        Object.assign(form, { time: '', location: '', icon: '📍', is_hotel: false, note: '', item_name: '', category: '購物 🛍️', owner: 'Karina' }); 
+                        showModal.value = true; 
+                    },
+                    deleteItem: async (id, table) => { if(confirm('確定刪除？')) { await _supabase.from(table).delete().eq('id', id); fetchData(); } },
+                    directToMap: (loc) => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`, '_blank'),
                     openTranslate: () => window.open(`https://translate.google.com/?sl=zh-TW&tl=${TRIP_CONFIG[activeTrip.value].lang}`, '_blank'),
                     openGoogleMapsList: () => {
-                        // 東京行程開啟 Cherry 的清單
-                        if (activeTrip.value === 'Tokyo') {
-                            window.open('https://maps.app.goo.gl/TLUuu6kzwEt7aLAg8', '_blank');
-                        } else {
-                            window.open('https://www.google.com/maps', '_blank');
-                        }
+                        if (activeTrip.value === 'Tokyo') window.open('https://maps.app.goo.gl/TLUuu6kzwEt7aLAg8', '_blank');
+                        else window.open('https://www.google.com/maps', '_blank');
                     }
                 };
             }
