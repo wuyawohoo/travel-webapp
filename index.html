@@ -241,9 +241,14 @@
                     directToMap: (loc) => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`, '_blank'),
                     openTranslate: () => window.open(`https://translate.google.com/?sl=zh-TW&tl=${TRIP_CONFIG[activeTrip.value].lang}`, '_blank'),
                     openGoogleMapsList: () => {
-                        if (activeTrip.value === 'Tokyo') window.open('https://maps.app.goo.gl/TLUuu6kzwEt7aLAg8', '_blank');
-                        else window.open('https://www.google.com/maps', '_blank');
-                    }
+    if (activeTrip.value === 'Seoul') {
+        window.open('https://naver.me/FXko6e6T', '_blank');
+    } else if (activeTrip.value === 'Tokyo') {
+        window.open('https://www.google.com/maps/@35.6672964,139.6345186,11z/data=!4m6!1m2!10m1!1e1!11m2!2s-dl_5o26TVeqZmszvVkv8Q!3e3?entry=ttu&g_ep=EgoyMDI2MDEyMS4wIKXMDSoASAFQAw%3D%3D', '_blank');
+    } else {
+        window.open('https://www.google.com/maps', '_blank');
+    }
+}
                 };
             }
         }).mount('#app');
